@@ -19,14 +19,14 @@ The estimator follows OSMS’s weighted EXP model while using party DPS to deter
 
 ```text
 average Spearman DPS = estimated clean-gear Power Strike damage ÷ attack interval in Spearman mode, or manual input in Details mode
-clear seconds = total map HP ÷ (average DPS per member × party size)
-cycle seconds = max(clear seconds, OSMS 7.56-second spawn cycle)
+combat clear seconds = total map HP ÷ (average DPS per member × party size)
+cycle seconds = max(combat clear seconds + estimated movement seconds, OSMS 7.56-second spawn cycle)
 full clears/hour = 3600 ÷ cycle seconds × map mob rate × uptime
 map EXP/hour = sum(monster EXP × map spawn points) × full clears/hour
 EXP/hour per character = map EXP/hour ÷ party size
 ```
 
-Spearman mode is a transparent approximation for levels 10–70. It assumes clean gear, 25 DEX, 5 STR gained per level after level 10, the OSMS spear progression, Power Strike ramping to 260% by level 30, and a simple 1.5/1.8-second normal/slow attack interval. It averages the estimated Power Strike damage range and does not model misses, monster defense, mastery progression, movement, or multi-target attacks. Details mode accepts manual average DPS. The calculator multiplies member DPS by party size for shared clear speed. OSMS’s 7.56-second cycle is the ceiling: increasing DPS improves the estimate until the party can clear within that cycle. Actual received EXP can still be lower because of movement, platform travel, spawn placement, missed attacks, kill priority, downtime, and uneven party distribution.
+Spearman mode is a transparent approximation for levels 10–70. It assumes clean gear, 25 DEX, 5 STR gained per level after level 10, the OSMS spear progression, Power Strike ramping to 260% by level 30, and a simple 1.5/1.8-second normal/slow attack interval. It averages the estimated Power Strike damage range and does not model misses, monster defense, mastery progression, movement, or multi-target attacks. Details mode accepts manual average DPS. The calculator multiplies member DPS by party size for shared clear speed. OSMS’s 7.56-second cycle is the ceiling: increasing DPS improves the estimate until the party can clear within that cycle. The starter maps add an estimated movement route of about 29.5 seconds for Damp Forest and 26.5 seconds for The Burnt Land II, based on OSMS spawn-coordinate platform groups and an assumed 180 pixels/second movement speed. This is not an exact player route and does not model ladders, drops, or party positioning. Actual received EXP can still be lower because of missed attacks, kill priority, additional downtime, and uneven party distribution.
 
 ## Data source
 
