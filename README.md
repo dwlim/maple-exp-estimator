@@ -15,17 +15,16 @@ The starter maps are **Damp Forest** and **The Burnt Land II**. A Custom map tab
 
 ## Calculation model
 
-The party is treated as one shared DPS pool:
+The estimator now follows OSMS’s weighted EXP model:
 
 ```text
-map clear seconds = total HP of all monsters on the map ÷ party DPS
-cycle seconds = max(map clear seconds, configured respawn lower bound)
-full clears/hour = 3600 ÷ cycle seconds × uptime
-monster EXP/hour = monster EXP × map count × full clears/hour
-EXP/hour per character = total party EXP/hour ÷ party size
+OSMS spawn cycle = 7.56 seconds when no mob-specific cooldown overrides it
+spawn cycles/hour = 3600 ÷ OSMS spawn cycle × map mob rate × uptime
+map EXP/hour = sum(monster EXP × map spawn points) × spawn cycles/hour
+EXP/hour per character = map EXP/hour ÷ party size
 ```
 
-This is an HP-weighted planning estimate. It assumes the party can distribute its combined DPS across the map and that EXP is shared evenly. Actual results can be lower because of movement, platform travel, spawn placement, missed attacks, kill priority, downtime, and uneven party distribution.
+Party DPS is retained as a planning input/display field, but it no longer limits the OSMS benchmark. OSMS’s map list uses spawn-point counts and adjusts each mob by its average spawn time; its default spawn time is 7.56 seconds. Actual received EXP can still be lower because of movement, platform travel, spawn placement, missed attacks, kill priority, downtime, and uneven party distribution.
 
 ## Data source
 
@@ -36,7 +35,7 @@ Current starter values:
 - Damp Forest: Slime (115 HP, 12 EXP, 2), Octopus (191 HP, 23 EXP, 15), Jr. Necki (272 HP, 39 EXP, 11)
 - The Burnt Land II: Dark Axe Stump (547 HP, 43 EXP, 12), Fire Boar (842 HP, 60 EXP, 19)
 
-The 60-second respawn lower bound is a planning assumption in this version. It should be replaced with verified map respawn data when available.
+The calculator uses OSMS’s 7.56-second default spawn cycle and map mob rate. Damp Forest uses mob rate 0.8, producing about 303,619 map EXP/hour before party sharing (matching OSMS’s weighted benchmark).
 
 ## Local development
 
