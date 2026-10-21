@@ -16,12 +16,14 @@ The calculator currently includes the 182 Victoria Island maps with usable monst
 
 ## Calculation model
 
-The estimator follows OSMS’s weighted EXP model while using party DPS and single-target attack timing to determine clear speed:
+The estimator follows OSMS’s weighted EXP model while using party DPS, map capacity, and single-target attack timing to determine clear speed:
 
 ```text
 average Spearman DPS = estimated clean-gear Power Strike damage ÷ attack interval in Spearman mode, or manual input in Details mode
 damage per attack = average DPS per member × 1.8 seconds, using attack speed 7
-attacks required = sum(ceil(monster HP ÷ damage per attack) × map count)
+active mob count = map capacity, or the raw spawn count when no capacity override is available
+active mob factor = active mob count ÷ raw spawn count
+attacks required = sum(ceil(monster HP ÷ damage per attack) × map count × active mob factor)
 combat clear seconds = attacks required × 1.8 seconds ÷ party size
 estimated movement seconds = slowest parallel area estimate, where spawn points are split into party-sized bands along the map’s dominant dimension and each area uses local nearest-spawn travel plus 10% of its diagonal and a total-mob-count adjustment
 cycle seconds = max(combat clear seconds + estimated movement seconds, OSMS 7.56-second spawn cycle)
