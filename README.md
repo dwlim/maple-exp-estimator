@@ -15,16 +15,17 @@ The starter maps are **Damp Forest** and **The Burnt Land II**. A Custom map tab
 
 ## Calculation model
 
-The estimator now follows OSMS’s weighted EXP model:
+The estimator follows OSMS’s weighted EXP model while using party DPS to determine clear speed:
 
 ```text
-OSMS spawn cycle = 7.56 seconds when no mob-specific cooldown overrides it
-spawn cycles/hour = 3600 ÷ OSMS spawn cycle × map mob rate × uptime
-map EXP/hour = sum(monster EXP × map spawn points) × spawn cycles/hour
+clear seconds = total map HP ÷ combined party DPS
+cycle seconds = max(clear seconds, OSMS 7.56-second spawn cycle)
+full clears/hour = 3600 ÷ cycle seconds × map mob rate × uptime
+map EXP/hour = sum(monster EXP × map spawn points) × full clears/hour
 EXP/hour per character = map EXP/hour ÷ party size
 ```
 
-Party DPS is retained as a planning input/display field, but it no longer limits the OSMS benchmark. OSMS’s map list uses spawn-point counts and adjusts each mob by its average spawn time; its default spawn time is 7.56 seconds. Actual received EXP can still be lower because of movement, platform travel, spawn placement, missed attacks, kill priority, downtime, and uneven party distribution.
+OSMS’s 7.56-second cycle is the ceiling: increasing DPS improves the estimate until the party can clear within that cycle. Actual received EXP can still be lower because of movement, platform travel, spawn placement, missed attacks, kill priority, downtime, and uneven party distribution.
 
 ## Data source
 
@@ -35,7 +36,7 @@ Current starter values:
 - Damp Forest: Slime (115 HP, 12 EXP, 2), Octopus (191 HP, 23 EXP, 15), Jr. Necki (272 HP, 39 EXP, 11)
 - The Burnt Land II: Dark Axe Stump (547 HP, 43 EXP, 12), Fire Boar (842 HP, 60 EXP, 19)
 
-The calculator uses OSMS’s 7.56-second default spawn cycle and map mob rate. Damp Forest uses mob rate 0.8, producing about 303,619 map EXP/hour before party sharing (matching OSMS’s weighted benchmark).
+The calculator uses OSMS’s 7.56-second default spawn cycle and map mob rate. At 100% uptime, Damp Forest approaches about 303,619 map EXP/hour when DPS is high enough; lower DPS produces a proportionally lower rate.
 
 ## Local development
 
