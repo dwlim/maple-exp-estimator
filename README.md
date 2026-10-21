@@ -10,6 +10,7 @@ Live site: <https://dwlim.github.io/maple-exp-estimator/>
 2. Choose Spearman mode to enter a level, or Details mode to enter average sustained DPS for one party member.
 3. Enter party size and uptime percentage.
 4. Read the expected EXP/hour for every monster and the total EXP/hour per character.
+5. Compare every OSMS map in the results table, sorted highest to lowest EXP/hour per character; click a row to expand its mob details.
 
 The calculator includes every OSMS map with usable monster spawn data, currently 211 maps. Damp Forest is selected by default.
 
