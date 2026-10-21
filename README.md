@@ -7,7 +7,7 @@ Live site: <https://dwlim.github.io/maple-exp-estimator/>
 ## How to use
 
 1. Choose a map.
-2. Enter the average sustained DPS of one party member.
+2. Choose Simple mode to enter average character level, or Details mode to enter average sustained DPS for one party member.
 3. Enter party size and uptime percentage.
 4. Read the expected EXP/hour for every monster and the total EXP/hour per character.
 
@@ -18,6 +18,7 @@ The starter maps are **Damp Forest** and **The Burnt Land II**. A Custom map tab
 The estimator follows OSMS’s weighted EXP model while using party DPS to determine clear speed:
 
 ```text
+average DPS per member = 20 + (level × 3.5) in Simple mode, or manual input in Details mode
 clear seconds = total map HP ÷ (average DPS per member × party size)
 cycle seconds = max(clear seconds, OSMS 7.56-second spawn cycle)
 full clears/hour = 3600 ÷ cycle seconds × map mob rate × uptime
@@ -25,7 +26,7 @@ map EXP/hour = sum(monster EXP × map spawn points) × full clears/hour
 EXP/hour per character = map EXP/hour ÷ party size
 ```
 
-The DPS input is the average sustained DPS of one party member; the calculator multiplies it by party size for shared clear speed. OSMS’s 7.56-second cycle is the ceiling: increasing DPS improves the estimate until the party can clear within that cycle. Actual received EXP can still be lower because of movement, platform travel, spawn placement, missed attacks, kill priority, downtime, and uneven party distribution.
+Simple mode uses a deliberately rough across-job estimate of `20 + (level × 3.5)` DPS per member. Details mode accepts manual average DPS. The calculator multiplies member DPS by party size for shared clear speed. OSMS’s 7.56-second cycle is the ceiling: increasing DPS improves the estimate until the party can clear within that cycle. Actual received EXP can still be lower because of movement, platform travel, spawn placement, missed attacks, kill priority, downtime, and uneven party distribution.
 
 ## Data source
 
