@@ -22,14 +22,14 @@ The estimator follows OSMS’s weighted EXP model while using party DPS, map cap
 average Spearman DPS = estimated clean-gear Power Strike damage ÷ attack interval in Spearman mode, or manual input in Details mode
 damage per attack = average DPS per member × 1.8 seconds, using attack speed 7
 active mob count = map capacity, or the raw spawn count when no capacity override is available
-active mob factor = active mob count ÷ raw spawn count
+active mob factor = active mob count ÷ raw spawn count; this scales active combat workload, not OSMS weighted EXP production
 attacks required = sum(ceil(monster HP ÷ damage per attack) × map count × active mob factor)
 combat clear seconds = attacks required × 1.8 seconds ÷ party size
 estimated movement seconds = slowest parallel area estimate, where spawn points are split into party-sized bands along the map’s dominant dimension and each area uses local nearest-spawn travel plus 10% of its diagonal and a total-mob-count adjustment
 effective clear seconds = max(combat clear seconds, estimated movement seconds), because movement and attacking can overlap
 cycle seconds = max(effective clear seconds, OSMS 7.56-second spawn cycle)
 full clears/hour = 3600 ÷ cycle seconds × map mob rate × uptime
-map EXP/hour = sum(monster EXP × map spawn points) × full clears/hour
+map EXP/hour = sum(monster EXP × map spawn points) × full clears/hour; OSMS weighted EXP already represents the map’s spawn production, so active-capacity scaling is not applied again to EXP
 EXP/hour per character = map EXP/hour ÷ party size
 estimated player WDEF = round(4 + (level − 10) × 2.5), representing clean Spearman armor from about 4 WDEF at level 10 to 154 at level 70
 HP potion cost/hour per character = sum(max(1, OSMS PADamage − estimated player WDEF) × mob count) × full clears/hour ÷ party size ÷ 2, using 1 meso = 2 HP
