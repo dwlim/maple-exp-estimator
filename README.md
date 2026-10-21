@@ -10,7 +10,7 @@ Live site: <https://dwlim.github.io/maple-exp-estimator/>
 2. Choose Spearman mode to enter a level, or Details mode to enter average sustained DPS for one party member.
 3. Enter party size and uptime percentage.
 4. Read the expected EXP/hour for every monster and the total EXP/hour per character.
-5. Compare Victoria Island maps in the results table, sorted highest to lowest EXP/hour per character; click a row to expand its mob details.
+5. Compare Victoria Island maps in the results table, sorted highest to lowest EXP/hour per character for the selected party size; the table also shows fixed 4-player and 6-player rates. Click a row to expand its mob details.
 
 The calculator currently includes the 182 Victoria Island maps with usable monster spawn data. Damp Forest is selected by default.
 
