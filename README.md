@@ -20,13 +20,14 @@ The estimator follows OSMS’s weighted EXP model while using party DPS to deter
 ```text
 average Spearman DPS = estimated clean-gear Power Strike damage ÷ attack interval in Spearman mode, or manual input in Details mode
 combat clear seconds = total map HP ÷ (average DPS per member × party size)
+estimated movement seconds = average nearest-spawn travel time ÷ party size
 cycle seconds = max(combat clear seconds + estimated movement seconds, OSMS 7.56-second spawn cycle)
 full clears/hour = 3600 ÷ cycle seconds × map mob rate × uptime
 map EXP/hour = sum(monster EXP × map spawn points) × full clears/hour
 EXP/hour per character = map EXP/hour ÷ party size
 ```
 
-Spearman mode is a transparent approximation for levels 10–70. It assumes clean gear, 25 DEX, 5 STR gained per level after level 10, the OSMS spear progression, Power Strike ramping to 260% by level 30, and a simple 1.5/1.8-second normal/slow attack interval. It averages the estimated Power Strike damage range and does not model misses, monster defense, mastery progression, movement, or multi-target attacks. Details mode accepts manual average DPS. The calculator multiplies member DPS by party size for shared clear speed. OSMS’s 7.56-second cycle is the ceiling: increasing DPS improves the estimate until the party can clear within that cycle. The starter maps add movement time based on the average distance from each OSMS spawn point to its nearest neighboring spawn. Damp Forest averages about 107 pixels (0.6 seconds) and The Burnt Land II about 126 pixels (0.7 seconds), using an assumed 180 pixels/second movement speed. This is not an exact player route and does not model ladders, drops, or party positioning. Actual received EXP can still be lower because of missed attacks, kill priority, additional downtime, and uneven party distribution.
+Spearman mode is a transparent approximation for levels 10–70. It assumes clean gear, 25 DEX, 5 STR gained per level after level 10, the OSMS spear progression, Power Strike ramping to 260% by level 30, and a simple 1.5/1.8-second normal/slow attack interval. It averages the estimated Power Strike damage range and does not model misses, monster defense, mastery progression, movement, or multi-target attacks. Details mode accepts manual average DPS. The calculator multiplies member DPS by party size for shared clear speed. OSMS’s 7.56-second cycle is the ceiling: increasing DPS improves the estimate until the party can clear within that cycle. The starter maps add movement time based on the average distance from each OSMS spawn point to its nearest neighboring spawn, then divide that travel time across the party. Damp Forest averages about 107 pixels and The Burnt Land II about 126 pixels before party splitting, using an assumed 180 pixels/second movement speed. This is not an exact player route and does not model ladders, drops, or party positioning. Actual received EXP can still be lower because of missed attacks, kill priority, additional downtime, and uneven party distribution.
 
 ## Data source
 
