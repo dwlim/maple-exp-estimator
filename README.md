@@ -12,7 +12,7 @@ Live site: <https://dwlim.github.io/maple-exp-estimator/>
 4. Read the expected EXP/hour for every monster and the total EXP/hour per character.
 5. Compare Victoria Island maps in the results table, sorted highest to lowest EXP/hour per character for the selected party size; the table also shows fixed 4-player and 6-player rates. Click a row to expand its mob details.
 
-The calculator currently includes the 182 Victoria Island maps with usable monster spawn data. Damp Forest is selected by default.
+The calculator includes Victoria Island maps with usable monster spawn data and excludes maps whose bundled monsters provide zero total EXP, such as placeholder/event areas. Damp Forest is selected by default.
 
 ## Calculation model
 
