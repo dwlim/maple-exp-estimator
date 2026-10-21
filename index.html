@@ -37,7 +37,7 @@ function spearDps(level){const l=Math.max(10,Math.min(70,Math.round(level))),w=[
  function banditDps(level){const l=Math.max(10,Math.min(70,Math.round(level))),luk=25+5*(l-10),dex=25+Math.floor((l-10)*.5),daggerAttack=30+Math.floor(l*.85),savageBlow=(luk*3.6+dex+daggerAttack)*2.6;return Math.max(1,Math.round(savageBlow/ATTACK_SECONDS*.75))}
  function classDps(job,level){return job==='Assassin'?assassinDps(level):job==='Bowman'?bowmanDps(level):job==='Bandit'?banditDps(level):spearDps(level)}
 function estimatedWdef(level){const l=Math.max(10,Math.min(70,Math.round(level)));return Math.round(4+(l-10)*2.5)}
- function classWdef(job,level){const warriorWdef=estimatedWdef(level);return job==='Assassin'||job==='Bowman'||job==='Bandit'?Math.round(warriorWdef*.72):warriorWdef
+ function classWdef(job,level){const warriorWdef=estimatedWdef(level);return job==='Assassin'||job==='Bowman'||job==='Bandit'?Math.round(warriorWdef*.72):warriorWdef}
 let mode='simple';let selected=VICTORIA_MAPS.find(m=>m.name==='Damp Forest')?.id||VICTORIA_MAPS[0]?.id,model;
 function render(){model=mapById[selected];q('#selectedMapName').textContent=model.name;q('#customHint').textContent=`${VICTORIA_MAPS.length} Victoria Island maps with mob spawn data are available.`;q('#mobRows').innerHTML=model.mobs.map((m,i)=>`<tr><td>${m[0]}</td><td>${fmt(m[1])}</td><td>${fmt(m[2])}</td><td>${fmt(m[3])}</td><td>${fmt(m[1]*m[3])}</td></tr>`).join('');calc()}
 function partyExpMultiplier(party){return party>=4?1.3:party===3?1.2:party===2?1.1:1}
