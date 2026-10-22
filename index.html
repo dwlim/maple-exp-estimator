@@ -182,6 +182,7 @@
         box-shadow: 0 0 0 2px #c7f36b22;
       }
       .table-wrap {
+        min-width: 0;
         overflow-x: auto;
       }
       .map-overview {
@@ -202,7 +203,7 @@
       .mob-table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 520px;
+        table-layout: fixed;
       }
       .mob-table th {
         text-align: left;
@@ -210,13 +211,15 @@
         font: 10px "DM Mono";
         font-weight: 400;
         text-transform: uppercase;
-        padding: 0 8px 9px;
+        padding: 0 5px 9px;
         border-bottom: 1px solid var(--line);
+        overflow-wrap: anywhere;
       }
       .mob-table td {
-        padding: 12px 8px;
+        padding: 12px 5px;
         border-bottom: 1px solid var(--line);
         font-size: 12px;
+        overflow-wrap: anywhere;
       }
       .mob-table td:not(:first-child) {
         font-family: "DM Mono";
@@ -481,7 +484,7 @@
         font-size: 10px;
         white-space: nowrap;
       }
-      @media (max-width: 700px) {
+      @media (max-width: 760px) {
         .selection-note {
           align-items: flex-start;
           flex-direction: column;
@@ -507,9 +510,6 @@
         }
         .result-list {
           grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-        .results-table {
-          min-width: 720px;
         }
       }
     </style>
