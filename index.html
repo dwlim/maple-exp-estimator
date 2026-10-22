@@ -764,6 +764,7 @@
                 <th>Map</th>
                 <th>Region</th>
                 <th>EXP/hour / char<br /><small>current party</small></th>
+                <th>Max mob count</th>
                 <th>Cycle<br /><small>current party</small></th>
                 <th>Potion cost / hour<br /><small>per character</small></th>
               </tr>
@@ -1431,7 +1432,7 @@
           q("#allMapRows").innerHTML = rows
             .map(
               ({ map, result }) =>
-                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name">${map.name}</td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td></tr>`,
+                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name">${map.name}</td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map))}</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td></tr>`,
             )
             .join("");
           q("#allMapRows")
