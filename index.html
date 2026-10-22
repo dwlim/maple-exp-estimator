@@ -690,8 +690,9 @@
               <h3>Combat and costs</h3>
               <ul>
                 <li>
-                  Non-Warrior jobs use 72% of equivalent Warrior WDEF. Physical
-                  avoidance estimates contact exposure from spawn spacing,
+                  WDEF uses a representative, unscrolled, level-appropriate armor
+                  set for each job family. It excludes scrolls, capes, shields,
+                  accessories, and bonus stats. Physical avoidance estimates contact exposure from spawn spacing,
                   density, monster size, speed, and jumping behavior; it adjusts
                   HP potion cost only.
                 </li>
@@ -728,7 +729,8 @@
                 </li>
                 <li>
                   Potion costs use estimated character WDEF and OSMS monster
-                  physical attack data. Actual damage and potion use can vary.
+                  physical attack data. The WDEF baseline is unscrolled gear, so
+                  actual damage and potion use can vary substantially with upgrades.
                 </li>
               </ul>
               <p><span id="customHint"></span></p>
@@ -1121,21 +1123,48 @@
                     ? 16
                     : 6;
         }
-        function estimatedWdef(level) {
+        const armorWdefByFamily = {
+          Warrior: [
+            [10, 30], [15, 50], [20, 78], [25, 112], [30, 151],
+            [35, 194], [40, 222], [50, 274], [60, 326], [70, 378],
+          ],
+          Bowman: [
+            [10, 22], [15, 36], [20, 54], [25, 78], [30, 108],
+            [35, 142], [40, 163], [50, 201], [60, 239], [70, 277],
+          ],
+          Thief: [
+            [10, 22], [15, 36], [20, 54], [25, 76], [30, 118],
+            [35, 181], [40, 207], [50, 255], [60, 303], [70, 351],
+          ],
+          Mage: [
+            [10, 18], [15, 28], [20, 40], [25, 55], [30, 72],
+            [35, 91], [40, 105], [50, 131], [60, 157], [70, 183],
+          ],
+        };
+        function interpolateArmorWdef(points, level) {
           const l = Math.max(10, Math.min(70, Math.round(level)));
-          // Level-appropriate Warrior armor totals roughly 250 WDEF by level 35.
-          return Math.round(30 + (l - 10) * 9);
+          for (let i = 1; i < points.length; i += 1) {
+            if (l <= points[i][0]) {
+              const [lowLevel, lowWdef] = points[i - 1],
+                [highLevel, highWdef] = points[i],
+                fraction = (l - lowLevel) / (highLevel - lowLevel);
+              return Math.round(lowWdef + (highWdef - lowWdef) * fraction);
+            }
+          }
+          return points[points.length - 1][1];
         }
         function classWdef(job, level) {
-          const warriorWdef = estimatedWdef(level);
-          return job === "Cleric" ||
-            job === "Fire/Poison" ||
-            job === "Ice/Lightning" ||
-            job === "Assassin" ||
-            job === "Bowman" ||
-            job === "Bandit"
-            ? Math.round(warriorWdef * 0.72)
-            : warriorWdef;
+          const family = job === "Warrior"
+            ? "Warrior"
+            : job === "Bowman"
+              ? "Bowman"
+              : job === "Assassin" || job === "Bandit"
+                ? "Thief"
+                : "Mage";
+          return interpolateArmorWdef(armorWdefByFamily[family], level);
+        }
+        function estimatedWdef(level) {
+          return classWdef("Warrior", level);
         }
         let selected =
             VICTORIA_MAPS.find((m) => m.name === "Damp Forest")?.id ||
