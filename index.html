@@ -729,8 +729,10 @@
                 </li>
                 <li>
                   Potion costs use estimated character WDEF and OSMS monster
-                  physical attack data. The WDEF baseline is unscrolled gear, so
-                  actual damage and potion use can vary substantially with upgrades.
+                  physical attack data. Incoming physical damage uses the Classic
+                  defense mitigation formula: monster attack × 100 / (100 + WDEF),
+                  with a minimum of 1 damage. The WDEF baseline is unscrolled gear,
+                  so actual damage and potion use can vary substantially with upgrades.
                 </li>
               </ul>
               <p><span id="customHint"></span></p>
@@ -1241,7 +1243,8 @@
                 n +
                 Math.max(
                   1,
-                  (OSMS_PATK[`${m[0]}|${m[1]}|${m[2]}`] || 0) - memberWdef,
+                  ((OSMS_PATK[`${m[0]}|${m[1]}|${m[2]}`] || 0) * 100) /
+                    (100 + memberWdef),
                 ) *
                   m[3] *
                   mobFactor,
