@@ -61,11 +61,30 @@
         font: 10px "DM Mono";
         margin-top: 3px;
       }
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
       .top-note {
         color: var(--muted);
         font-size: 12px;
         text-align: right;
         max-width: 350px;
+      }
+      .top-link {
+        align-self: flex-start;
+        border: 1px solid #4b456d;
+        border-radius: 999px;
+        padding: 8px 11px;
+        color: var(--lime);
+        font: 10px "DM Mono";
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .top-link:hover {
+        background: #2b3421;
+        border-color: var(--lime);
       }
       .eyebrow {
         font: 11px "DM Mono";
@@ -192,11 +211,11 @@
         align-items: start;
       }
       .map-overview .summary {
-        grid-column: 2;
+        grid-column: 1;
         grid-row: 1;
       }
       .map-overview > .table-wrap {
-        grid-column: 1;
+        grid-column: 2;
         grid-row: 1;
       }
       .mob-table {
@@ -376,33 +395,24 @@
         color: #fff;
         white-space: nowrap;
       }
-      .expander-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
+      .info-expander {
         margin-top: 14px;
-      }
-      .calculation,
-      .data-info {
         border: 1px solid var(--line);
         border-radius: 10px;
         background: #17181d;
         overflow: hidden;
       }
-      .calculation summary,
-      .data-info summary {
+      .info-expander > summary {
         padding: 11px 13px;
         color: var(--text);
         font: 600 11px Manrope;
         cursor: pointer;
         list-style: none;
       }
-      .calculation summary::-webkit-details-marker,
-      .data-info summary::-webkit-details-marker {
+      .info-expander > summary::-webkit-details-marker {
         display: none;
       }
-      .calculation summary::before,
-      .data-info summary::before {
+      .info-expander > summary::before {
         content: "+";
         display: inline-grid;
         place-items: center;
@@ -415,21 +425,48 @@
         font: 13px/1 "DM Mono";
         vertical-align: -2px;
       }
-      .calculation[open] summary::before,
-      .data-info[open] summary::before {
+      .info-expander[open] > summary::before {
         content: "−";
       }
-      .calculation summary:hover,
-      .data-info summary:hover {
+      .info-expander > summary:hover {
         background: #202127;
       }
-      .explain,
-      .data-info .source {
+      .expander-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .expander-column p,
+      .expander-column ul {
         color: var(--muted);
         font-size: 10px;
-        line-height: 1.55;
-        margin: 0;
-        padding: 0 13px 13px;
+        line-height: 1.6;
+        margin: 0 13px 12px;
+        padding: 0;
+      }
+      .expander-column p {
+        padding: 0;
+      }
+      .expander-column ul {
+        padding-left: 27px;
+      }
+      .expander-column li + li {
+        margin-top: 6px;
+      }
+      .expander-column h3 {
+        margin: 14px 13px 6px;
+        color: var(--lime);
+        font: 500 9px "DM Mono";
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      .expander-column h2 {
+        margin: 0 0 8px;
+        padding: 0 13px;
+        color: var(--text);
+        font: 600 10px "DM Mono";
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
       }
       .source {
         color: var(--muted);
@@ -519,7 +556,16 @@
             ><span>classic map planning tool</span>
           </div>
         </div>
-        <div class="top-note">OSMS data · party planning</div>
+        <div class="top-actions">
+          <div class="top-note">OSMS data · party planning</div>
+          <a
+            class="top-link"
+            href="https://dwlim.github.io/maple-exp-tracker/"
+            target="_blank"
+            rel="noopener"
+            >Open EXP tracker ↗</a
+          >
+        </div>
       </header>
       <div class="eyebrow">Map comparison</div>
       <h1>Find the map<br /><em>worth your time.</em></h1>
@@ -610,61 +656,85 @@
             </div>
           </div>
         </div>
-        <div class="expander-grid">
-          <details class="calculation">
-            <summary>How this is calculated</summary>
-            <p class="explain">
-              EXP uses OSMS spawn rates, map population, party clear speed, and
-              uptime.<br /><br />Level + job estimates a party made of roughly
-              half the selected class and half Warriors.<br /><br />Clerics use
-              Holy Arrow at attack speed 6 with 50% of melee movement loss; Holy
-              Arrow deals 50% extra damage to the bundled undead/holy-weak
-              monsters.<br /><br />Fire/Poison mages use Fire Arrow at attack
-              speed 6 with 50% of melee movement loss; Fire Arrow deals 50%
-              extra damage to the bundled fire-weak monsters.<br /><br />Ice/Lightning
-              mages use Cold Beam at attack speed 6 with 50% of melee movement
-              loss; Cold Beam deals 50% extra damage to the bundled ice-weak
-              monsters.<br /><br />Assassins use Lucky 7 at attack speed 3 with
-              50% of melee movement loss.<br /><br />Bowmen use Arrow Blow at
-              attack speed 6 with 75% of melee movement loss.<br /><br />Bandits
-              use Savage Blow at attack speed 7 with 100% of melee movement
-              loss.<br /><br />Clerics, Fire/Poison mages, Ice/Lightning mages,
-              Assassins, Bowmen, and Bandits use 72% of equivalent Warrior
-              WDEF.<br /><br />Physical avoidance estimates contact exposure
-              from spawn spacing, density, monster size, speed, and jumping
-              behavior, then adjusts HP potion usage only.<br /><br />MP cost
-              uses one modeled skill cast per attack, with approximate costs of
-              6 MP for Power Strike, 14 for Arrow Blow, 8 for Lucky Seven, 16
-              for Savage Blow, 14 for Holy Arrow, and 20 for the elemental mage
-              skills.
-            </p>
-          </details>
-          <details class="data-info">
-            <summary>Data & assumptions</summary>
-            <p class="source">
-              Data:
-              <a
-                href="https://osmsdataexplorer.com/#overview"
-                target="_blank"
-                rel="noopener"
-                >OSMS Data Explorer</a
-              >.<br /><br />Class values are clean-gear estimates; each party is
-              roughly half the selected class and half Warriors.<br /><br />Clerics
-              use Holy Arrow at attack speed 6 with 50% of melee movement loss,
-              with a 50% weakness bonus against bundled undead/holy-weak
-              monsters.<br /><br />Fire/Poison mages use Fire Arrow at attack
-              speed 6 with 50% of melee movement loss, with a 50% weakness bonus
-              against bundled fire-weak monsters.<br /><br />Assassins use
-              attack speed 3 with 50% of melee movement loss.<br /><br />Bowmen
-              use attack speed 6 with 75% of melee movement loss.<br /><br />Bandits
-              use attack speed 7 with 100% of melee movement loss; Clerics,
-              Fire/Poison mages, Ice/Lightning mages, Assassins, Bowmen, and
-              Bandits use 72% of equivalent Warrior WDEF.<br /><br />Movement is
-              an approximate parallel-area route.
-              <span id="customHint"></span>
-            </p>
-          </details>
-        </div>
+        <details class="info-expander">
+          <summary>How this is calculated &amp; data assumptions</summary>
+          <div class="expander-grid">
+            <section class="expander-column">
+              <h2>How this is calculated</h2>
+              <p>
+                EXP/hour uses OSMS map spawn data, party clear speed, and your
+                uptime setting. The party is modeled as roughly half your
+                selected job and half Warriors.
+              </p>
+              <h3>Job estimates</h3>
+              <ul>
+                <li>
+                  Cleric: Holy Arrow, speed 6; half the melee movement loss and
+                  50% bonus damage against bundled undead and holy-weak
+                  monsters.
+                </li>
+                <li>
+                  Fire/Poison: Fire Arrow, speed 6; half the melee movement loss
+                  and 50% bonus damage against bundled fire-weak monsters.
+                </li>
+                <li>
+                  Ice/Lightning: Cold Beam, speed 6; half the melee movement
+                  loss and 50% bonus damage against bundled ice-weak monsters.
+                </li>
+                <li>
+                  Assassin: Lucky 7, speed 3, 50% movement estimate. Bowman:
+                  Arrow Blow, speed 6, 75% movement estimate. Bandit: Savage
+                  Blow, speed 7, full melee movement estimate.
+                </li>
+              </ul>
+              <h3>Combat and costs</h3>
+              <ul>
+                <li>
+                  Non-Warrior jobs use 72% of equivalent Warrior WDEF. Physical
+                  avoidance estimates contact exposure from spawn spacing,
+                  density, monster size, speed, and jumping behavior; it adjusts
+                  HP potion cost only.
+                </li>
+                <li>
+                  MP cost assumes one skill cast per attack: Power Strike 6,
+                  Arrow Blow 14, Lucky Seven 8, Savage Blow 16, Holy Arrow 14,
+                  and elemental mage skills 20 MP.
+                </li>
+              </ul>
+            </section>
+            <section class="expander-column">
+              <h2>Data &amp; assumptions</h2>
+              <p>
+                Monster HP, EXP, and map population come from
+                <a
+                  href="https://osmsdataexplorer.com/#overview"
+                  target="_blank"
+                  rel="noopener"
+                  >OSMS Data Explorer</a
+                >. Map results use Victoria Island spawn data. Maps without
+                usable monster spawns or with zero total EXP are excluded.
+              </p>
+              <h3>Character model</h3>
+              <ul>
+                <li>
+                  Job DPS uses estimated clean-gear stats and a representative
+                  attack skill. It does not model misses, monster defense, exact
+                  mastery, multi-target attacks, or equipment variation.
+                </li>
+                <li>
+                  Movement uses a parallel-area route estimate. It does not
+                  model exact paths, platforms, ladders, drops, or party
+                  positioning.
+                </li>
+                <li>
+                  Potion costs use estimated character WDEF and OSMS monster
+                  physical attack data. Actual damage and potion use can vary.
+                </li>
+              </ul>
+              <p><span id="customHint"></span></p>
+            </section>
+          </div>
+        </details>
       </section>
       <section class="panel all-results">
         <div class="panel-head">
@@ -800,15 +870,14 @@
               Math.floor(((area + 1) * sorted.length) / areas),
             );
             if (!points.length) continue;
-            const nearest = points.map((point, i) =>
-              Math.min(
-                ...points.map((other, j) =>
-                  j === i
-                    ? Infinity
-                    : Math.hypot(point[0] - other[0], point[1] - other[1]),
-                ),
-              ),
-            );
+            const nearest = points.map((point, i) => {
+              const distances = points
+                .filter((_, j) => j !== i)
+                .map((other) =>
+                  Math.hypot(point[0] - other[0], point[1] - other[1]),
+                );
+              return distances.length ? Math.min(...distances) : 0;
+            });
             const areaXs = points.map((point) => point[0]),
               areaYs = points.map((point) => point[1]),
               areaDiagonal = Math.hypot(
