@@ -191,14 +191,13 @@
         gap: 18px;
         align-items: start;
       }
-      .map-overview .results {
-        display: contents;
+      .map-overview .summary {
+        grid-column: 2;
+        grid-row: 1;
       }
-      .map-overview .results > div:first-child {
-        order: -1;
-      }
-      .map-overview .results > div:last-child {
-        grid-column: 1/-1;
+      .map-overview > .table-wrap {
+        grid-column: 1;
+        grid-row: 1;
       }
       .mob-table {
         width: 100%;
@@ -499,14 +498,10 @@
         .map-overview {
           grid-template-columns: 1fr;
         }
+        .map-overview .summary,
         .map-overview > .table-wrap {
-          order: 1;
-        }
-        .map-overview .results > div:first-child {
-          order: 0;
-        }
-        .map-overview .results > div:last-child {
-          order: 2;
+          grid-column: 1;
+          grid-row: auto;
         }
         .result-list {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -582,39 +577,35 @@
               <tbody id="mobRows"></tbody>
             </table>
           </div>
-          <div class="results">
-            <div class="summary">
-              <div class="big" id="perPlayer">—</div>
-              <div class="unit">expected EXP / hour per character</div>
-              <div class="result-list">
-                <div>
-                  <span>Total EXP / hour</span><span id="partyRate">—</span>
-                </div>
-                <div>
-                  <span>Member DPS</span><span id="estimatedDps">—</span>
-                </div>
-                <div>
-                  <span>Player WDEF</span><span id="estimatedWdef">—</span>
-                </div>
-                <div>
-                  <span>Movement loss</span><span id="movementLoss">—</span>
-                </div>
-                <div><span>Total map HP</span><span id="totalHp">—</span></div>
-                <div>
-                  <span>Clear / cycle time</span><span id="cycleTime">—</span>
-                </div>
-                <div>
-                  <span>Full clears / hour</span><span id="clears">—</span>
-                </div>
-                <div>
-                  <span>Physical avoidance</span><span id="avoidance">—</span>
-                </div>
-                <div>
-                  <span>HP potion cost / hour</span><span id="mesoCost">—</span>
-                </div>
-                <div>
-                  <span>MP potion cost / hour</span><span id="mpCost">—</span>
-                </div>
+          <div class="summary">
+            <div class="big" id="perPlayer">—</div>
+            <div class="unit">expected EXP / hour per character</div>
+            <div class="result-list">
+              <div>
+                <span>Total EXP / hour</span><span id="partyRate">—</span>
+              </div>
+              <div><span>Member DPS</span><span id="estimatedDps">—</span></div>
+              <div>
+                <span>Player WDEF</span><span id="estimatedWdef">—</span>
+              </div>
+              <div>
+                <span>Movement loss</span><span id="movementLoss">—</span>
+              </div>
+              <div><span>Total map HP</span><span id="totalHp">—</span></div>
+              <div>
+                <span>Clear / cycle time</span><span id="cycleTime">—</span>
+              </div>
+              <div>
+                <span>Full clears / hour</span><span id="clears">—</span>
+              </div>
+              <div>
+                <span>Physical avoidance</span><span id="avoidance">—</span>
+              </div>
+              <div>
+                <span>HP potion cost / hour</span><span id="mesoCost">—</span>
+              </div>
+              <div>
+                <span>MP potion cost / hour</span><span id="mpCost">—</span>
               </div>
             </div>
           </div>
