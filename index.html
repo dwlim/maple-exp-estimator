@@ -596,8 +596,6 @@
                 <div>
                   <span>Player WDEF</span><span id="estimatedWdef">—</span>
                 </div>
-                <div></div>
-                <div></div>
                 <div>
                   <span>Movement loss</span><span id="movementLoss">—</span>
                 </div>
@@ -619,63 +617,63 @@
                 </div>
               </div>
             </div>
-            <div class="expander-grid">
-              <details class="calculation">
-                <summary>How this is calculated</summary>
-                <p class="explain">
-                  EXP uses OSMS spawn rates, map population, party clear speed,
-                  and uptime.<br /><br />Level + job estimates a party made of
-                  roughly half the selected class and half Warriors.<br /><br />Clerics
-                  use Holy Arrow at attack speed 6 with 50% of melee movement
-                  loss; Holy Arrow deals 50% extra damage to the bundled
-                  undead/holy-weak monsters.<br /><br />Fire/Poison mages use
-                  Fire Arrow at attack speed 6 with 50% of melee movement loss;
-                  Fire Arrow deals 50% extra damage to the bundled fire-weak
-                  monsters.<br /><br />Ice/Lightning mages use Cold Beam at
-                  attack speed 6 with 50% of melee movement loss; Cold Beam
-                  deals 50% extra damage to the bundled ice-weak monsters.<br /><br />Assassins
-                  use Lucky 7 at attack speed 3 with 50% of melee movement
-                  loss.<br /><br />Bowmen use Arrow Blow at attack speed 6 with
-                  75% of melee movement loss.<br /><br />Bandits use Savage Blow
-                  at attack speed 7 with 100% of melee movement loss.<br /><br />Clerics,
-                  Fire/Poison mages, Ice/Lightning mages, Assassins, Bowmen, and
-                  Bandits use 72% of equivalent Warrior WDEF.<br /><br />Physical
-                  avoidance estimates contact exposure from spawn spacing,
-                  density, monster size, speed, and jumping behavior, then
-                  adjusts HP potion usage only.<br /><br />MP cost uses one
-                  modeled skill cast per attack, with approximate costs of 6 MP
-                  for Power Strike, 14 for Arrow Blow, 8 for Lucky Seven, 16 for
-                  Savage Blow, 14 for Holy Arrow, and 20 for the elemental mage
-                  skills.
-                </p>
-              </details>
-            </div>
           </div>
         </div>
-        <details class="data-info">
-          <summary>Data & assumptions</summary>
-          <p class="source">
-            Data:
-            <a
-              href="https://osmsdataexplorer.com/#overview"
-              target="_blank"
-              rel="noopener"
-              >OSMS Data Explorer</a
-            >.<br /><br />Class values are clean-gear estimates; each party is
-            roughly half the selected class and half Warriors.<br /><br />Clerics
-            use Holy Arrow at attack speed 6 with 50% of melee movement loss,
-            with a 50% weakness bonus against bundled undead/holy-weak
-            monsters.<br /><br />Fire/Poison mages use Fire Arrow at attack
-            speed 6 with 50% of melee movement loss, with a 50% weakness bonus
-            against bundled fire-weak monsters.<br /><br />Assassins use attack
-            speed 3 with 50% of melee movement loss.<br /><br />Bowmen use
-            attack speed 6 with 75% of melee movement loss.<br /><br />Bandits
-            use attack speed 7 with 100% of melee movement loss; Clerics,
-            Fire/Poison mages, Ice/Lightning mages, Assassins, Bowmen, and
-            Bandits use 72% of equivalent Warrior WDEF.<br /><br />Movement is
-            an approximate parallel-area route. <span id="customHint"></span>
-          </p>
-        </details>
+        <div class="expander-grid">
+          <details class="calculation">
+            <summary>How this is calculated</summary>
+            <p class="explain">
+              EXP uses OSMS spawn rates, map population, party clear speed, and
+              uptime.<br /><br />Level + job estimates a party made of roughly
+              half the selected class and half Warriors.<br /><br />Clerics use
+              Holy Arrow at attack speed 6 with 50% of melee movement loss; Holy
+              Arrow deals 50% extra damage to the bundled undead/holy-weak
+              monsters.<br /><br />Fire/Poison mages use Fire Arrow at attack
+              speed 6 with 50% of melee movement loss; Fire Arrow deals 50%
+              extra damage to the bundled fire-weak monsters.<br /><br />Ice/Lightning
+              mages use Cold Beam at attack speed 6 with 50% of melee movement
+              loss; Cold Beam deals 50% extra damage to the bundled ice-weak
+              monsters.<br /><br />Assassins use Lucky 7 at attack speed 3 with
+              50% of melee movement loss.<br /><br />Bowmen use Arrow Blow at
+              attack speed 6 with 75% of melee movement loss.<br /><br />Bandits
+              use Savage Blow at attack speed 7 with 100% of melee movement
+              loss.<br /><br />Clerics, Fire/Poison mages, Ice/Lightning mages,
+              Assassins, Bowmen, and Bandits use 72% of equivalent Warrior
+              WDEF.<br /><br />Physical avoidance estimates contact exposure
+              from spawn spacing, density, monster size, speed, and jumping
+              behavior, then adjusts HP potion usage only.<br /><br />MP cost
+              uses one modeled skill cast per attack, with approximate costs of
+              6 MP for Power Strike, 14 for Arrow Blow, 8 for Lucky Seven, 16
+              for Savage Blow, 14 for Holy Arrow, and 20 for the elemental mage
+              skills.
+            </p>
+          </details>
+          <details class="data-info">
+            <summary>Data & assumptions</summary>
+            <p class="source">
+              Data:
+              <a
+                href="https://osmsdataexplorer.com/#overview"
+                target="_blank"
+                rel="noopener"
+                >OSMS Data Explorer</a
+              >.<br /><br />Class values are clean-gear estimates; each party is
+              roughly half the selected class and half Warriors.<br /><br />Clerics
+              use Holy Arrow at attack speed 6 with 50% of melee movement loss,
+              with a 50% weakness bonus against bundled undead/holy-weak
+              monsters.<br /><br />Fire/Poison mages use Fire Arrow at attack
+              speed 6 with 50% of melee movement loss, with a 50% weakness bonus
+              against bundled fire-weak monsters.<br /><br />Assassins use
+              attack speed 3 with 50% of melee movement loss.<br /><br />Bowmen
+              use attack speed 6 with 75% of melee movement loss.<br /><br />Bandits
+              use attack speed 7 with 100% of melee movement loss; Clerics,
+              Fire/Poison mages, Ice/Lightning mages, Assassins, Bowmen, and
+              Bandits use 72% of equivalent Warrior WDEF.<br /><br />Movement is
+              an approximate parallel-area route.
+              <span id="customHint"></span>
+            </p>
+          </details>
+        </div>
       </section>
       <section class="panel all-results">
         <div class="panel-head">
