@@ -1123,7 +1123,8 @@
         }
         function estimatedWdef(level) {
           const l = Math.max(10, Math.min(70, Math.round(level)));
-          return Math.round(4 + (l - 10) * 2.5);
+          // Level-appropriate Warrior armor totals roughly 250 WDEF by level 35.
+          return Math.round(30 + (l - 10) * 9);
         }
         function classWdef(job, level) {
           const warriorWdef = estimatedWdef(level);
