@@ -21,15 +21,15 @@ The estimator follows OSMS’s weighted EXP model while using party DPS, map cap
 ```text
 average Warrior DPS = estimated clean-gear Power Strike damage ÷ attack interval
 damage per attack = average DPS per member × 1.8 seconds, using attack speed 7
-active mob count = map capacity, or the raw spawn count when no capacity override is available
-active mob factor = active mob count ÷ raw spawn count; this scales active combat workload, not OSMS weighted EXP production
+active mob count = min(40, spawn points × mobRate × player capacity factor), rounded to a whole mob; player capacity factor is 75% for one player, increasing by 5 percentage points per additional player up to 100%
+active mob factor = active mob count ÷ raw spawn count; this scales the active map workload, including EXP, HP, and attacks required
 attacks required = sum(ceil(monster HP ÷ damage per attack) × map count × active mob factor)
 combat clear seconds = attacks required × 1.8 seconds ÷ party size
 estimated movement seconds = slowest parallel area estimate, where spawn points are split into party-sized bands along the map’s dominant dimension and each area uses local nearest-spawn travel plus 10% of its diagonal and a total-mob-count adjustment
 effective clear seconds = max(combat clear seconds, estimated movement seconds), because movement and attacking can overlap
 cycle seconds = max(effective clear seconds, OSMS 7.56-second spawn cycle)
-full clears/hour = 3600 ÷ cycle seconds × map mob rate × uptime
-map EXP/hour = sum(monster EXP × map spawn points) × full clears/hour; OSMS weighted EXP already represents the map’s spawn production, so active-capacity scaling is not applied again to EXP
+full clears/hour = 3600 ÷ cycle seconds × uptime
+map EXP/hour = sum(monster EXP × map spawn points × active mob factor) × full clears/hour; mobRate is applied through effective map capacity, not again as a separate clears multiplier to EXP
 EXP/hour per character = map EXP/hour ÷ party size
 estimated player WDEF = round(4 + (level − 10) × 2.5), representing clean Warrior armor from about 4 WDEF at level 10 to 154 at level 70
 HP potion cost/hour per character = sum(max(1, OSMS PADamage − estimated player WDEF) × mob count) × full clears/hour ÷ party size ÷ 2, using 1 meso = 2 HP
@@ -44,7 +44,7 @@ Monster HP, EXP, and map population defaults are sourced from [OSMS Data Explore
 
 The map dropdown and results table use the Victoria Island subset of OSMS `maps.json` and `monsters.json`, combining each map’s mob spawn positions with monster HP and EXP. Maps without usable monster spawn data are excluded. At each player level, maps containing a known monster more than three levels above the player are hidden.
 
-The calculator uses OSMS’s 7.56-second default spawn cycle and map mob rate. At 100% uptime, Damp Forest approaches about 303,619 map EXP/hour when DPS is high enough; lower DPS produces a proportionally lower rate.
+The calculator uses OSMS’s 7.56-second default spawn cycle. Map `mobRate` scales effective capacity, with a 75% solo capacity factor increasing by 5 percentage points per additional player and a 40-mob cap. At 100% uptime, Damp Forest’s effective capacity is 17 mobs solo and 20 mobs with a four-player party; lower DPS produces a proportionally lower rate.
 
 ## Local development
 

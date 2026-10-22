@@ -847,16 +847,19 @@
           ATTACK_SPEED = 7,
           ATTACK_SECONDS = speedSeconds[ATTACK_SPEED],
           MOVE_SPEED = 180,
-          ACTIVE_MOB_CAPACITY = { "Damp Forest": 17 };
-        function activeMobCount(map) {
-          return (
-            ACTIVE_MOB_CAPACITY[map.name] ||
-            map.mobs.reduce((sum, mob) => sum + mob[3], 0)
+          MAX_MAP_MOBS = 40;
+        function activeMobCount(map, party = 1) {
+          const spawnPoints = map.positions?.length ||
+              map.mobs.reduce((sum, mob) => sum + mob[3], 0),
+            playerCapacityFactor = Math.min(1, 0.75 + (Math.max(1, party) - 1) * 0.05);
+          return Math.min(
+            MAX_MAP_MOBS,
+            Math.round(spawnPoints * map.mobRate * playerCapacityFactor),
           );
         }
-        function activeMobFactor(map) {
+        function activeMobFactor(map, party = 1) {
           const total = map.mobs.reduce((sum, mob) => sum + mob[3], 0);
-          return total ? activeMobCount(map) / total : 1;
+          return total ? activeMobCount(map, party) / total : 1;
         }
         function baseMovementSeconds(map, party) {
           const p = map.positions || [];
@@ -1216,9 +1219,9 @@
               (memberDps * memberAttackSeconds * selectedMembers +
                 warriorDps * warriorAttackSeconds * warriorMembers) /
               party,
-            mobFactor = activeMobFactor(map),
+            mobFactor = activeMobFactor(map, party),
             totalHp = map.mobs.reduce((n, m) => n + m[1] * m[3] * mobFactor, 0),
-            totalExp = map.mobs.reduce((n, m) => n + m[2] * m[3], 0),
+            totalExp = map.mobs.reduce((n, m) => n + m[2] * m[3] * mobFactor, 0),
             attacksRequired = map.mobs.reduce((n, m) => {
               const holyFactor =
                   (job === "Cleric" && holyWeakMonsters.has(m[0])) ||
@@ -1269,7 +1272,7 @@
               party,
             combatAndMovement = Math.max(clearSeconds, movement),
             cycle = Math.max(combatAndMovement, OSMS_SPAWN_CYCLE),
-            clears = ((3600 / cycle) * map.mobRate * uptime) / 100,
+            clears = ((3600 / cycle) * uptime) / 100,
             partyRate = totalExp * clears * partyExpMultiplier(party),
             avoidance = physicalAvoidance(map),
             hpPerCharacter =
@@ -1433,7 +1436,7 @@
           q("#allMapRows").innerHTML = rows
             .map(
               ({ map, result }) =>
-                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name">${map.name}</td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td></tr>`,
+                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name">${map.name}</td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td></tr>`,
             )
             .join("");
           q("#allMapRows")
