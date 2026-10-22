@@ -187,7 +187,7 @@
       }
       .map-overview {
         display: grid;
-        grid-template-columns: 0.9fr 1.1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 18px;
         align-items: start;
       }
@@ -446,7 +446,7 @@
         color: var(--muted);
         font: 10px "DM Mono";
       }
-      @media (max-width: 760px) {
+      @media (max-width: 600px) {
         .app {
           padding: 25px 14px 45px;
         }
@@ -484,7 +484,7 @@
         font-size: 10px;
         white-space: nowrap;
       }
-      @media (max-width: 760px) {
+      @media (max-width: 600px) {
         .selection-note {
           align-items: flex-start;
           flex-direction: column;
