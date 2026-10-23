@@ -587,6 +587,7 @@
             <label>Job</label
             ><select id="job">
               <option>Warrior</option>
+              <option>Magician</option>
               <option>Cleric</option>
               <option>Fire/Poison</option>
               <option>Ice/Lightning</option>
@@ -671,6 +672,10 @@
               <h3>Job estimates</h3>
               <ul>
                 <li>
+                  Magician: Magic Claw, speed 6; half the melee movement loss
+                  with two magic hits per cast.
+                </li>
+                <li>
                   Cleric: Holy Arrow, speed 6; half the melee movement loss and
                   50% bonus damage against bundled undead and holy-weak
                   monsters.
@@ -700,8 +705,8 @@
                 </li>
                 <li>
                   MP cost assumes one skill cast per attack: Power Strike 6,
-                  Arrow Blow 14, Lucky Seven 8, Savage Blow 16, Holy Arrow 14,
-                  and elemental mage skills 20 MP.
+                  Magic Claw 20, Arrow Blow 14, Lucky Seven 8, Savage Blow 16,
+                  Holy Arrow 14, and elemental mage skills 20 MP.
                 </li>
               </ul>
             </section>
@@ -1089,6 +1094,14 @@
             iceBlast = (int * 3.4 + luk + magicAttack) * 1.5;
           return Math.max(1, Math.round(iceBlast / speedSeconds[6]));
         }
+        function magicianDps(level) {
+          const l = Math.max(10, Math.min(70, Math.round(level))),
+            int = primaryStat(l),
+            luk = 25 + Math.floor((l - 10) * 0.5),
+            magicAttack = 20 + Math.floor(l * 0.8),
+            magicClaw = (int * 3.4 + luk + magicAttack) * 0.8;
+          return Math.max(1, Math.round(magicClaw / speedSeconds[6]));
+        }
         function classAttackSeconds(job, level) {
           const progression =
             job === "Assassin"
@@ -1097,7 +1110,8 @@
                 ? bowProgression
                 : job === "Bandit"
                   ? daggerProgression
-                  : job === "Cleric" ||
+                  : job === "Magician" ||
+                      job === "Cleric" ||
                       job === "Fire/Poison" ||
                       job === "Ice/Lightning"
                     ? null
@@ -1105,9 +1119,11 @@
           return speedSeconds[progression ? weaponAtLevel(progression, level)[2] : 6];
         }
         function classDps(job, level) {
-          return job === "Cleric"
-            ? clericDps(level)
-            : job === "Fire/Poison"
+          return job === "Magician"
+            ? magicianDps(level)
+            : job === "Cleric"
+              ? clericDps(level)
+              : job === "Fire/Poison"
               ? firePoisonDps(level)
               : job === "Ice/Lightning"
                 ? iceLightningDps(level)
@@ -1120,9 +1136,11 @@
                       : spearDps(level);
         }
         function skillMpCost(job) {
-          return job === "Cleric"
-            ? 14
-            : job === "Fire/Poison" || job === "Ice/Lightning"
+          return job === "Magician"
+            ? 20
+            : job === "Cleric"
+              ? 14
+              : job === "Fire/Poison" || job === "Ice/Lightning"
               ? 20
               : job === "Assassin"
                 ? 8
@@ -1337,7 +1355,8 @@
               classAttackSeconds(job, level),
               job === "Assassin"
                 ? 0.5
-                : job === "Cleric" ||
+                : job === "Magician" ||
+                    job === "Cleric" ||
                     job === "Fire/Poison" ||
                     job === "Ice/Lightning"
                   ? 0.5
@@ -1370,7 +1389,8 @@
             classAttackSeconds(job, level),
             job === "Assassin"
               ? 0.5
-              : job === "Cleric" ||
+              : job === "Magician" ||
+                  job === "Cleric" ||
                   job === "Fire/Poison" ||
                   job === "Ice/Lightning"
                 ? 0.5
