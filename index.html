@@ -1089,6 +1089,21 @@
             iceBlast = (int * 3.4 + luk + magicAttack) * 1.5;
           return Math.max(1, Math.round(iceBlast / speedSeconds[6]));
         }
+        function classAttackSeconds(job, level) {
+          const progression =
+            job === "Assassin"
+              ? clawProgression
+              : job === "Bowman"
+                ? bowProgression
+                : job === "Bandit"
+                  ? daggerProgression
+                  : job === "Cleric" ||
+                      job === "Fire/Poison" ||
+                      job === "Ice/Lightning"
+                    ? null
+                    : spearProgression;
+          return speedSeconds[progression ? weaponAtLevel(progression, level)[2] : 6];
+        }
         function classDps(job, level) {
           return job === "Cleric"
             ? clericDps(level)
