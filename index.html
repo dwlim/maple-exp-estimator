@@ -516,6 +516,16 @@
         color: var(--text);
         font-size: 15px;
       }
+      .osms-link {
+        color: var(--lime);
+        font: 10px "DM Mono";
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .osms-link:hover {
+        text-decoration: underline;
+      }
       .selection-note .eyebrow {
         font-size: 10px;
         white-space: nowrap;
@@ -580,6 +590,7 @@
         </div>
         <div class="selection-note">
           <strong id="selectedMapName">—</strong
+          ><a id="selectedMapLink" class="osms-link" target="_blank" rel="noopener">View layout ↗</a
           ><span>Click a row below to switch maps.</span>
         </div>
         <div class="controls">
@@ -1197,9 +1208,13 @@
             VICTORIA_MAPS.find((m) => m.name === "Damp Forest")?.id ||
             VICTORIA_MAPS[0]?.id,
           model;
+        function osmsMapUrl(map) {
+          return `https://osmsdataexplorer.com/#maps?q=${encodeURIComponent(`id:${String(map.id).padStart(9, "0")}`)}`;
+        }
         function render() {
           model = mapById[selected];
           q("#selectedMapName").textContent = model.name;
+          q("#selectedMapLink").href = osmsMapUrl(model);
           q("#customHint").textContent =
             `${VICTORIA_MAPS.length} Victoria Island maps with monsters no more than 3 levels above the player.`;
           q("#mobRows").innerHTML = model.mobs
@@ -1444,7 +1459,7 @@
           q("#allMapRows").innerHTML = rows
             .map(
               ({ map, result }) =>
-                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name">${map.name}</td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td></tr>`,
+                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name"><a class="osms-link" href="${osmsMapUrl(map)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${map.name} ↗</a></td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td></tr>`,
             )
             .join("");
           q("#allMapRows")
