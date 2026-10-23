@@ -625,7 +625,7 @@
           </div>
           <div class="summary">
             <div class="big" id="perPlayer">—</div>
-            <div class="unit">expected EXP / hour per character</div>
+            <div class="unit">expected EXP / hour for selected job</div>
             <div class="result-list">
               <div>
                 <span>Total EXP / hour</span><span id="partyRate">—</span>
@@ -664,7 +664,9 @@
               <p>
                 EXP/hour uses OSMS map spawn data, party clear speed, and your
                 uptime setting. The party is modeled as your selected job plus
-                Warriors for every other party member.
+                Warriors for every other party member. Because members are
+                assumed to work separate mobs, your EXP is weighted by your
+                share of the party's effective DPS instead of divided equally.
               </p>
               <h3>Job estimates</h3>
               <ul>
@@ -1259,6 +1261,9 @@
             cycle = Math.max(combatAndMovement, OSMS_SPAWN_CYCLE),
             clears = ((3600 / cycle) * uptime) / 100,
             partyRate = totalExp * clears * partyExpMultiplier(party),
+            selectedDpsShare =
+              memberDps / Math.max(1, memberDps + warriorDps * warriorMembers),
+            selectedExp = partyRate * selectedDpsShare,
             avoidance = physicalAvoidance(map),
             hpPerCharacter =
               (monsterDamage * avoidance.contactFactor * clears) / party,
@@ -1277,12 +1282,13 @@
             cycle,
             clears,
             partyRate,
+            selectedDpsShare,
             avoidance,
             hpPerCharacter,
             mesoPerCharacter: hpPerCharacter / 2,
             mpPerCharacter,
             mpMesoPerCharacter: mpPerCharacter,
-            perPlayer: partyRate / party,
+            perPlayer: selectedExp,
           };
         }
         function calc() {
