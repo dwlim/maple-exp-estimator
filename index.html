@@ -812,6 +812,7 @@
                 <th>Map</th>
                 <th>Region</th>
                 <th>EXP/hour / char<br /><small>current party</small></th>
+                <th>Attack method</th>
                 <th>Max mob count</th>
                 <th>Spawn rate</th>
                 <th>Cycle<br /><small>current party</small></th>
@@ -1518,6 +1519,9 @@
           q("#avoidance").textContent = result.avoidance.label;
           q("#mesoCost").textContent = fmt(result.mesoPerCharacter);
           q("#mpCost").textContent = `${fmt(result.mpMesoPerCharacter)}${result.useBasicAttack ? " (basic attack)" : ""}`;
+          q("#estimatedDps").previousElementSibling.textContent = result.useBasicAttack
+            ? "Member DPS (basic attack)"
+            : "Member DPS (skill)";
           q("#grossMeso").textContent = fmt(result.grossMeso);
           q("#netMeso").textContent = fmt(result.netMeso);
           renderAllResults(
@@ -1593,13 +1597,12 @@
                         true,
                       )
                     : null,
-                  result =
-                    basicResult &&
+                  useBasicAttack =
+                    !!basicResult &&
                     Math.abs(basicResult.perPlayer - skillResult.perPlayer) <
-                      0.000001
-                      ? basicResult
-                      : skillResult;
-                return { map, result };
+                      0.000001,
+                  result = useBasicAttack ? basicResult : skillResult;
+                return { map, result, useBasicAttack };
               })
                .sort((a, b) => {
                   const aValue =
@@ -1618,8 +1621,8 @@
                });
           q("#allMapRows").innerHTML = rows
             .map(
-              ({ map, result }) =>
-                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name"><a class="osms-link" href="${osmsMapUrl(map)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${escapeHtml(map.name)} ↗</a></td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td><td>${fmt(result.grossMeso)}</td><td>${fmt(result.netMeso)}</td></tr>`,
+              ({ map, result, useBasicAttack }) =>
+                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name"><a class="osms-link" href="${osmsMapUrl(map)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${escapeHtml(map.name)} ↗</a></td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${useBasicAttack ? "Basic attack" : "Skill"}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td><td>${fmt(result.grossMeso)}</td><td>${fmt(result.netMeso)}</td></tr>`,
             )
             .join("");
           q("#allMapRows")
