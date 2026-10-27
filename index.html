@@ -1496,8 +1496,7 @@
               : null,
             useBasicAttack =
               !!basicResult &&
-              Math.abs(basicResult.perPlayer - skillResult.perPlayer) <=
-                Math.max(0.001, Math.max(basicResult.perPlayer, skillResult.perPlayer) * 1e-9),
+              Math.round(basicResult.perPlayer) === Math.round(skillResult.perPlayer),
             memberDps = useBasicAttack ? basicDps : skillDps,
             memberAttackSeconds = useBasicAttack
               ? basicAttackSeconds
@@ -1596,8 +1595,7 @@
                     : null,
                   useBasicAttack =
                     !!basicResult &&
-                    Math.abs(basicResult.perPlayer - skillResult.perPlayer) <=
-                      Math.max(0.001, Math.max(basicResult.perPlayer, skillResult.perPlayer) * 1e-9),
+                    Math.round(basicResult.perPlayer) === Math.round(skillResult.perPlayer),
                   result = useBasicAttack ? basicResult : skillResult;
                 return { map, result, useBasicAttack };
               })
