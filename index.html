@@ -1188,28 +1188,24 @@
                       ? banditDps(level)
                       : spearDps(level);
         }
+        function skillModifier(job) {
+          return job === "Assassin"
+            ? 1.4 * 2
+            : job === "Bowman"
+              ? 2.4
+              : job === "Bandit"
+                ? 4.5
+                : job === "Magician"
+                  ? 0.8
+                  : job === "Cleric" ||
+                      job === "Fire/Poison" ||
+                      job === "Ice/Lightning"
+                    ? 1.5
+                    : 2.6;
+        }
         function basicAttackDps(job, level) {
-          const l = Math.max(10, Math.min(70, Math.round(level))),
-            mastery = l < 30 ? 0.6 : 0.9,
-            attackSeconds = classAttackSeconds(job, l);
           if (["Magician", "Cleric", "Fire/Poison", "Ice/Lightning"].includes(job)) return 0;
-          if (job === "Assassin" || job === "Bandit") {
-            const w = weaponAtLevel(job === "Assassin" ? clawProgression : daggerProgression, l),
-              damage = (primaryStat(l) * 3.6 + 25 + Math.floor((l - 10) * 0.5) + w[1]) * mastery;
-            return Math.max(1, Math.round(damage / attackSeconds));
-          }
-          if (job === "Bowman") {
-            const w = weaponAtLevel(bowProgression, l),
-              damage = (primaryStat(l) * 3.4 + 25 + Math.floor((l - 10) * 0.5) + w[1]) * mastery;
-            return Math.max(1, Math.round(damage / attackSeconds));
-          }
-          const w = weaponAtLevel(spearProgression, l),
-            damage =
-              (((primaryStat(l) * 4.5 * 0.9 + 25 + w[1]) +
-                (primaryStat(l) * 5 + 25 + w[1])) /
-                2) *
-              mastery;
-          return Math.max(1, Math.round(damage / attackSeconds));
+          return Math.max(1, classDps(job, level) / skillModifier(job));
         }
         function skillMpCost(job) {
           return job === "Magician"
@@ -1329,7 +1325,7 @@
             mobFactor = activeMobFactor(map, party),
             totalHp = map.mobs.reduce((n, m) => n + m[1] * m[3] * mobFactor, 0),
             totalExp = map.mobs.reduce((n, m) => n + m[2] * m[3] * mobFactor, 0),
-            attackPattern = map.mobs.map((m) => {
+            attacksRequired = map.mobs.reduce((n, m) => {
               const holyFactor =
                   (job === "Cleric" && holyWeakMonsters.has(m[0])) ||
                   (job === "Fire/Poison" && fireWeakMonsters.has(m[0])) ||
@@ -1343,12 +1339,13 @@
                     selectedMembers +
                     warriorDps * warriorAttackSeconds * warriorMembers) /
                   party;
-              return Math.ceil(m[1] / Math.max(1, effectiveDamage));
-            }),
-            attacksRequired = attackPattern.reduce(
-              (n, attacks, i) => n + attacks * map.mobs[i][3] * mobFactor,
-              0,
-            ),
+              return (
+                n +
+                Math.ceil(m[1] / Math.max(1, effectiveDamage)) *
+                  m[3] *
+                  mobFactor
+              );
+            }, 0),
             monsterDamage = map.mobs.reduce(
               (n, m) =>
                 n +
@@ -1411,7 +1408,6 @@
             totalHp,
             totalExp,
             attacksRequired,
-            attackPattern,
             monsterDamage,
             wdef: memberWdef,
             warriorWdef,
@@ -1500,8 +1496,8 @@
               : null,
             useBasicAttack =
               !!basicResult &&
-              Math.abs(basicResult.partyRate - skillResult.partyRate) <=
-                Math.max(0.001, Math.max(basicResult.partyRate, skillResult.partyRate) * 1e-9),
+              Math.abs(basicResult.perPlayer - skillResult.perPlayer) <=
+                Math.max(0.001, Math.max(basicResult.perPlayer, skillResult.perPlayer) * 1e-9),
             memberDps = useBasicAttack ? basicDps : skillDps,
             memberAttackSeconds = useBasicAttack
               ? basicAttackSeconds
@@ -1600,8 +1596,8 @@
                     : null,
                   useBasicAttack =
                     !!basicResult &&
-                    Math.abs(basicResult.partyRate - skillResult.partyRate) <=
-                      Math.max(0.001, Math.max(basicResult.partyRate, skillResult.partyRate) * 1e-9),
+                    Math.abs(basicResult.perPlayer - skillResult.perPlayer) <=
+                      Math.max(0.001, Math.max(basicResult.perPlayer, skillResult.perPlayer) * 1e-9),
                   result = useBasicAttack ? basicResult : skillResult;
                 return { map, result, useBasicAttack };
               })
