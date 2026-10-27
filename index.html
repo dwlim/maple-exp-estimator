@@ -1202,7 +1202,11 @@
             return Math.max(1, Math.round(damage / attackSeconds));
           }
           const w = weaponAtLevel(spearProgression, l),
-            damage = (((primaryStat(l) * 4.5 * 0.9 + 25) + (primaryStat(l) * 5 + 25)) / 2) * w[1] / 100 * mastery;
+            damage =
+              (((primaryStat(l) * 4.5 * 0.9 + 25 + w[1]) +
+                (primaryStat(l) * 5 + 25 + w[1])) /
+                2) *
+              mastery;
           return Math.max(1, Math.round(damage / attackSeconds));
         }
         function skillMpCost(job) {
