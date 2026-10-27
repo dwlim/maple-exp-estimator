@@ -1500,8 +1500,9 @@
               : null,
             useBasicAttack =
               !!basicResult &&
-              JSON.stringify(basicResult.attackPattern) ===
-                JSON.stringify(skillResult.attackPattern),
+              basicResult.attackPattern.every(
+                (attacks, i) => attacks <= skillResult.attackPattern[i],
+              ),
             memberDps = useBasicAttack ? basicDps : skillDps,
             memberAttackSeconds = useBasicAttack
               ? basicAttackSeconds
@@ -1600,8 +1601,9 @@
                     : null,
                   useBasicAttack =
                     !!basicResult &&
-                    JSON.stringify(basicResult.attackPattern) ===
-                      JSON.stringify(skillResult.attackPattern),
+                    basicResult.attackPattern.every(
+                      (attacks, i) => attacks <= skillResult.attackPattern[i],
+                    ),
                   result = useBasicAttack ? basicResult : skillResult;
                 return { map, result, useBasicAttack };
               })
