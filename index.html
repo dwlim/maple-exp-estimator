@@ -1449,7 +1449,6 @@
             skillDps = classDps(job, level),
             skillAttackSeconds = classAttackSeconds(job, level),
             basicDps = basicAttackDps(job, level),
-            basicAttackSeconds = classAttackSeconds(job, level),
             warriorDps = spearDps(level),
             memberWdef = classWdef(job, level),
             warriorWdef = estimatedWdef(level),
@@ -1484,7 +1483,7 @@
                   party,
                   basicDps,
                   warriorDps,
-                  basicAttackSeconds,
+                  skillAttackSeconds,
                   movementPenalty,
                   uptime,
                   memberWdef,
@@ -1496,10 +1495,10 @@
               : null,
             useBasicAttack =
               !!basicResult &&
-              Math.abs(basicResult.cycle - skillResult.cycle) <= 1e-9,
+              Math.round(basicResult.perPlayer) === Math.round(skillResult.perPlayer),
             memberDps = useBasicAttack ? basicDps : skillDps,
             memberAttackSeconds = useBasicAttack
-              ? basicAttackSeconds
+              ? skillAttackSeconds
               : skillAttackSeconds,
             result = useBasicAttack ? basicResult : skillResult;
           q("#perPlayer").textContent = fmt(result.perPlayer);
@@ -1526,7 +1525,7 @@
             basicDps,
             warriorDps,
             skillAttackSeconds,
-            basicAttackSeconds,
+            skillAttackSeconds,
             job === "Assassin"
               ? 0.5
               : job === "Magician" ||
@@ -1550,7 +1549,6 @@
           basicDps,
           warriorDps,
           skillAttackSeconds,
-          basicAttackSeconds,
           memberMovementPenalty,
           uptime,
           memberWdef,
@@ -1583,7 +1581,7 @@
                         party,
                         basicDps,
                         warriorDps,
-                        basicAttackSeconds,
+                        skillAttackSeconds,
                         memberMovementPenalty,
                         uptime,
                         memberWdef,
@@ -1595,7 +1593,7 @@
                     : null,
                   useBasicAttack =
                     !!basicResult &&
-                    Math.abs(basicResult.cycle - skillResult.cycle) <= 1e-9,
+                    Math.round(basicResult.perPlayer) === Math.round(skillResult.perPlayer),
                   result = useBasicAttack ? basicResult : skillResult;
                 return { map, result, useBasicAttack };
               })
