@@ -666,7 +666,7 @@
                 <span>MP potion cost / hour</span><span id="mpCost">—</span>
               </div>
               <div>
-                <span>Gross mesos / hour</span><span id="grossMeso">—</span>
+                <span>Gross mesos / hour / character</span><span id="grossMeso">—</span>
               </div>
             </div>
           </div>
@@ -726,7 +726,7 @@
                   Gross mesos use the OSMS estimate: base drop is
                   floor(2.1 × monster level) + 3, the amount rolls from 90–110%
                   of base, and drops occur approximately 67% of the time. This is
-                  total mesos generated on the map before party sharing.
+                  total mesos generated on the map, split evenly between party members.
                 </li>
               </ul>
             </section>
@@ -795,7 +795,7 @@
                 <th>Spawn rate</th>
                 <th>Cycle<br /><small>current party</small></th>
                 <th>Potion cost / hour<br /><small>per character</small></th>
-                <th>Gross mesos / hour</th>
+                <th>Gross mesos / hour<br /><small>per character</small></th>
               </tr>
             </thead>
             <tbody id="allMapRows"></tbody>
@@ -1342,8 +1342,8 @@
                   clears *
                   expectedMesoDrop(OSMS_MONSTER_LEVELS[m[0]] || 1) *
                   0.67,
-              0,
-            );
+                  0,
+            ) / party;
           return {
             totalHp,
             totalExp,
