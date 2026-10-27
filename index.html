@@ -1313,7 +1313,6 @@
           warriorWdef,
           job = "Warrior",
           playerLevel = 30,
-          useBasicAttack = false,
         ) {
           const warriorAttackSeconds = ATTACK_SECONDS,
             { selectedMembers, warriorMembers } = partyComposition(party),
@@ -1395,7 +1394,7 @@
               (monsterDamage * avoidance.contactFactor * clears) / party,
             mpPerCharacter =
               ((clears * clearSeconds) / memberAttackSeconds) *
-              useBasicAttack ? 0 : skillMpCost(job),
+              (useBasicAttack ? 0 : skillMpCost(job)),
             grossMeso = map.mobs.reduce(
               (total, m) =>
                 total +
@@ -1452,19 +1451,11 @@
             skillAttackSeconds = classAttackSeconds(job, level),
             basicDps = basicAttackDps(job, level),
             basicAttackSeconds = classAttackSeconds(job, level),
-            useBasicAttack = basicDps > 0 && Math.abs(basicDps * basicAttackSeconds - skillDps * skillAttackSeconds) < 0.000001,
-            memberDps = useBasicAttack ? basicDps : skillDps,
-            memberAttackSeconds = useBasicAttack ? basicAttackSeconds : skillAttackSeconds,
             warriorDps = spearDps(level),
             memberWdef = classWdef(job, level),
             warriorWdef = estimatedWdef(level),
             uptime = Math.max(1, Math.min(100, +q("#uptime").value || 1)),
-            result = estimate(
-              model,
-              party,
-              memberDps,
-              warriorDps,
-              memberAttackSeconds,
+            movementPenalty =
               job === "Assassin"
                 ? 0.5
                 : job === "Magician" ||
@@ -1475,13 +1466,44 @@
                   : job === "Bowman"
                     ? 0.75
                     : 1,
+            skillResult = estimate(
+              model,
+              party,
+              skillDps,
+              warriorDps,
+              skillAttackSeconds,
+              movementPenalty,
               uptime,
               memberWdef,
               warriorWdef,
               job,
               level,
-              useBasicAttack,
-            );
+            ),
+            basicResult = basicDps
+              ? estimate(
+                  model,
+                  party,
+                  basicDps,
+                  warriorDps,
+                  basicAttackSeconds,
+                  movementPenalty,
+                  uptime,
+                  memberWdef,
+                  warriorWdef,
+                  job,
+                  level,
+                  true,
+                )
+              : null,
+            useBasicAttack =
+              !!basicResult &&
+              Math.abs(basicResult.perPlayer - skillResult.perPlayer) <
+                0.000001,
+            memberDps = useBasicAttack ? basicDps : skillDps,
+            memberAttackSeconds = useBasicAttack
+              ? basicAttackSeconds
+              : skillAttackSeconds,
+            result = useBasicAttack ? basicResult : skillResult;
           q("#perPlayer").textContent = fmt(result.perPlayer);
           q("#partyRate").textContent = fmt(result.partyRate);
           q("#estimatedDps").textContent = fmt(memberDps);
@@ -1499,9 +1521,11 @@
           q("#netMeso").textContent = fmt(result.netMeso);
           renderAllResults(
             party,
-            memberDps,
+            skillDps,
+            basicDps,
             warriorDps,
-            classAttackSeconds(job, level),
+            skillAttackSeconds,
+            basicAttackSeconds,
             job === "Assassin"
               ? 0.5
               : job === "Magician" ||
@@ -1517,21 +1541,21 @@
             warriorWdef,
             job,
             level,
-            useBasicAttack,
           );
         }
         function renderAllResults(
           party,
-          memberDps,
+          skillDps,
+          basicDps,
           warriorDps,
-          memberAttackSeconds,
+          skillAttackSeconds,
+          basicAttackSeconds,
           memberMovementPenalty,
           uptime,
           memberWdef,
           warriorWdef,
           job = "Warrior",
           playerLevel = 30,
-          useBasicAttack = false,
         ) {
            const query = (q("#mapSearch")?.value || "").trim().toLowerCase(),
              sortBy = q("#mapSort")?.value || "xp",
@@ -1539,19 +1563,41 @@
               (map) => !query || map.name.toLowerCase().includes(query),
             )
               .map((map) => {
-                const result = estimate(
-                  map,
-                  party,
-                  memberDps,
-                  warriorDps,
-                  memberAttackSeconds,
-                  memberMovementPenalty,
-                  uptime,
-                  memberWdef,
-                  warriorWdef,
-                  job,
-                  playerLevel,
-                );
+                const skillResult = estimate(
+                    map,
+                    party,
+                    skillDps,
+                    warriorDps,
+                    skillAttackSeconds,
+                    memberMovementPenalty,
+                    uptime,
+                    memberWdef,
+                    warriorWdef,
+                    job,
+                    playerLevel,
+                  ),
+                  basicResult = basicDps
+                    ? estimate(
+                        map,
+                        party,
+                        basicDps,
+                        warriorDps,
+                        basicAttackSeconds,
+                        memberMovementPenalty,
+                        uptime,
+                        memberWdef,
+                        warriorWdef,
+                        job,
+                        playerLevel,
+                        true,
+                      )
+                    : null,
+                  result =
+                    basicResult &&
+                    Math.abs(basicResult.perPlayer - skillResult.perPlayer) <
+                      0.000001
+                      ? basicResult
+                      : skillResult;
                 return { map, result };
               })
                .sort((a, b) => {
