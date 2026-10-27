@@ -1329,7 +1329,7 @@
             mobFactor = activeMobFactor(map, party),
             totalHp = map.mobs.reduce((n, m) => n + m[1] * m[3] * mobFactor, 0),
             totalExp = map.mobs.reduce((n, m) => n + m[2] * m[3] * mobFactor, 0),
-            attacksRequired = map.mobs.reduce((n, m) => {
+            attackPattern = map.mobs.map((m) => {
               const holyFactor =
                   (job === "Cleric" && holyWeakMonsters.has(m[0])) ||
                   (job === "Fire/Poison" && fireWeakMonsters.has(m[0])) ||
@@ -1343,13 +1343,12 @@
                     selectedMembers +
                     warriorDps * warriorAttackSeconds * warriorMembers) /
                   party;
-              return (
-                n +
-                Math.ceil(m[1] / Math.max(1, effectiveDamage)) *
-                  m[3] *
-                  mobFactor
-              );
-            }, 0),
+              return Math.ceil(m[1] / Math.max(1, effectiveDamage));
+            }),
+            attacksRequired = attackPattern.reduce(
+              (n, attacks, i) => n + attacks * map.mobs[i][3] * mobFactor,
+              0,
+            ),
             monsterDamage = map.mobs.reduce(
               (n, m) =>
                 n +
@@ -1412,6 +1411,7 @@
             totalHp,
             totalExp,
             attacksRequired,
+            attackPattern,
             monsterDamage,
             wdef: memberWdef,
             warriorWdef,
@@ -1500,7 +1500,8 @@
               : null,
             useBasicAttack =
               !!basicResult &&
-              basicResult.attacksRequired === skillResult.attacksRequired,
+              JSON.stringify(basicResult.attackPattern) ===
+                JSON.stringify(skillResult.attackPattern),
             memberDps = useBasicAttack ? basicDps : skillDps,
             memberAttackSeconds = useBasicAttack
               ? basicAttackSeconds
@@ -1599,7 +1600,8 @@
                     : null,
                   useBasicAttack =
                     !!basicResult &&
-                    basicResult.attacksRequired === skillResult.attacksRequired,
+                    JSON.stringify(basicResult.attackPattern) ===
+                      JSON.stringify(skillResult.attackPattern),
                   result = useBasicAttack ? basicResult : skillResult;
                 return { map, result, useBasicAttack };
               })
