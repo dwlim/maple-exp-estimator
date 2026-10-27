@@ -336,6 +336,18 @@
       .map-tools input[type="checkbox"] {
         accent-color: var(--lime);
       }
+      .map-sort {
+        background: #111216;
+        border: 1px solid #41424b;
+        border-radius: 6px;
+        color: var(--text);
+        padding: 10px 8px;
+        font: 12px "DM Mono";
+      }
+      .map-sort:focus {
+        outline: none;
+        border-color: var(--lime);
+      }
       .map-search {
         width: 100%;
         max-width: 320px;
@@ -783,9 +795,14 @@
             placeholder="Search maps…"
             aria-label="Search maps"
           /><label
-            ><input id="levelFilter" type="checkbox" checked /> Hide maps with
-            monsters more than 3 levels higher</label
-          >
+             ><input id="levelFilter" type="checkbox" checked /> Hide maps with
+             monsters more than 3 levels higher</label
+           ><label for="mapSort">Sort by
+             <select id="mapSort" class="map-sort" aria-label="Sort map results">
+               <option value="xp">EXP/hour</option>
+               <option value="netMeso">Net mesos/hour</option>
+             </select>
+           </label>
         </div>
         <div class="table-wrap">
           <table class="results-table">
@@ -811,7 +828,7 @@
         </p>
       </section>
       <div class="footer">
-        Results are sorted by expected EXP/hour per character.
+         Use the sort control to rank results by EXP/hour or net mesos/hour.
       </div>
     </main>
     <script src="maps-data.js"></script>
@@ -1472,8 +1489,9 @@
           job = "Warrior",
           playerLevel = 30,
         ) {
-          const query = (q("#mapSearch")?.value || "").trim().toLowerCase(),
-            rows = VICTORIA_MAPS.filter(
+           const query = (q("#mapSearch")?.value || "").trim().toLowerCase(),
+             sortBy = q("#mapSort")?.value || "xp",
+             rows = VICTORIA_MAPS.filter(
               (map) => !query || map.name.toLowerCase().includes(query),
             )
               .map((map) => {
@@ -1492,11 +1510,11 @@
                 );
                 return { map, result };
               })
-              .sort(
-                (a, b) =>
-                  b.result.perPlayer - a.result.perPlayer ||
-                  a.map.name.localeCompare(b.map.name),
-              );
+               .sort((a, b) => {
+                 const aValue = sortBy === "netMeso" ? a.result.netMeso : a.result.perPlayer,
+                   bValue = sortBy === "netMeso" ? b.result.netMeso : b.result.perPlayer;
+                 return bValue - aValue || a.map.name.localeCompare(b.map.name);
+               });
           q("#allMapRows").innerHTML = rows
             .map(
               ({ map, result }) =>
@@ -1517,8 +1535,9 @@
           .forEach((x) => x.addEventListener("input", calc));
         q("#levelFilter").addEventListener("change", calc);
         q("#job").addEventListener("change", calc);
-        q("#mapSearch").addEventListener("input", calc);
-        render();
+         q("#mapSearch").addEventListener("input", calc);
+         q("#mapSort").addEventListener("change", calc);
+         render();
       })();
     </script>
   </body>
