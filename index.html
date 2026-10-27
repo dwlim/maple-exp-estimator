@@ -825,7 +825,14 @@
           fmtTime = (s) =>
             s < 60
               ? `${s.toFixed(1)}s`
-              : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
+              : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`,
+          escapeHtml = (value) =>
+            String(value)
+              .replaceAll("&", "&amp;")
+              .replaceAll("<", "&lt;")
+              .replaceAll(">", "&gt;")
+              .replaceAll('"', "&quot;")
+              .replaceAll("'", "&#39;");
         const OSMS_SPAWN_CYCLE = 7.56;
         const spearProgression = [
             [10, 32, 7],
@@ -1493,7 +1500,7 @@
           q("#allMapRows").innerHTML = rows
             .map(
               ({ map, result }) =>
-                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name"><a class="osms-link" href="${osmsMapUrl(map)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${map.name} ↗</a></td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td><td>${fmt(result.grossMeso)}</td><td>${fmt(result.netMeso)}</td></tr>`,
+                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name"><a class="osms-link" href="${osmsMapUrl(map)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${escapeHtml(map.name)} ↗</a></td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td><td>${fmt(result.grossMeso)}</td><td>${fmt(result.netMeso)}</td></tr>`,
             )
             .join("");
           q("#allMapRows")
