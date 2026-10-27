@@ -1385,9 +1385,7 @@
             ),
             clears = ((3600 / cycle) * uptime) / 100,
             partyRate = totalExp * clears * partyExpMultiplier(party),
-            selectedDpsShare =
-              memberDps / Math.max(1, memberDps + warriorDps * warriorMembers),
-            selectedExp = partyRate * selectedDpsShare,
+            selectedExp = partyRate / party,
             avoidance = physicalAvoidance(map),
             hpPerCharacter =
               (monsterDamage * avoidance.contactFactor * clears) / party,
@@ -1416,7 +1414,6 @@
             cycle,
             clears,
             partyRate,
-            selectedDpsShare,
             avoidance,
             hpPerCharacter,
             mesoPerCharacter: hpPerCharacter / 2,
