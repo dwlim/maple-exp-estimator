@@ -1448,7 +1448,7 @@
             skillAttackSeconds = classAttackSeconds(job, level),
             basicDps = basicAttackDps(job, level),
             basicAttackSeconds = classAttackSeconds(job, level),
-            useBasicAttack = basicDps > 0 && basicDps * basicAttackSeconds >= skillDps * skillAttackSeconds,
+            useBasicAttack = basicDps > 0 && Math.abs(basicDps * basicAttackSeconds - skillDps * skillAttackSeconds) < 0.000001,
             memberDps = useBasicAttack ? basicDps : skillDps,
             memberAttackSeconds = useBasicAttack ? basicAttackSeconds : skillAttackSeconds,
             warriorDps = spearDps(level),
