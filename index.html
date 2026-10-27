@@ -665,6 +665,9 @@
               <div>
                 <span>MP potion cost / hour</span><span id="mpCost">—</span>
               </div>
+              <div>
+                <span>Gross mesos / hour</span><span id="grossMeso">—</span>
+              </div>
             </div>
           </div>
         </div>
@@ -718,6 +721,12 @@
                   MP cost assumes one skill cast per attack: Power Strike 6,
                   Magic Claw 20, Arrow Blow 14, Lucky Seven 8, Savage Blow 16,
                   Holy Arrow 14, and elemental mage skills 20 MP.
+                </li>
+                <li>
+                  Gross mesos use the OSMS estimate: base drop is
+                  floor(2.1 × monster level) + 3, the amount rolls from 90–110%
+                  of base, and drops occur approximately 67% of the time. This is
+                  total mesos generated on the map before party sharing.
                 </li>
               </ul>
             </section>
@@ -786,6 +795,7 @@
                 <th>Spawn rate</th>
                 <th>Cycle<br /><small>current party</small></th>
                 <th>Potion cost / hour<br /><small>per character</small></th>
+                <th>Gross mesos / hour</th>
               </tr>
             </thead>
             <tbody id="allMapRows"></tbody>
@@ -1191,6 +1201,12 @@
           }
           return points[points.length - 1][1];
         }
+        function expectedMesoDrop(monsterLevel) {
+          const base = Math.floor((21 * monsterLevel) / 10) + 3;
+          return Array.from({ length: 21 }, (_, index) =>
+            Math.floor((base * (90 + index)) / 100),
+          ).reduce((total, amount) => total + amount, 0) / 21;
+        }
         function classWdef(job, level) {
           const family = job === "Warrior"
             ? "Warrior"
@@ -1317,7 +1333,17 @@
               (monsterDamage * avoidance.contactFactor * clears) / party,
             mpPerCharacter =
               ((clears * clearSeconds) / memberAttackSeconds) *
-              skillMpCost(job);
+              skillMpCost(job),
+            grossMeso = map.mobs.reduce(
+              (total, m) =>
+                total +
+                  m[3] *
+                  mobFactor *
+                  clears *
+                  expectedMesoDrop(OSMS_MONSTER_LEVELS[m[0]] || 1) *
+                  0.67,
+              0,
+            );
           return {
             totalHp,
             totalExp,
@@ -1336,6 +1362,7 @@
             mesoPerCharacter: hpPerCharacter / 2,
             mpPerCharacter,
             mpMesoPerCharacter: mpPerCharacter,
+            grossMeso,
             perPlayer: selectedExp,
           };
         }
@@ -1397,6 +1424,7 @@
           q("#avoidance").textContent = result.avoidance.label;
           q("#mesoCost").textContent = fmt(result.mesoPerCharacter);
           q("#mpCost").textContent = fmt(result.mpMesoPerCharacter);
+          q("#grossMeso").textContent = fmt(result.grossMeso);
           renderAllResults(
             party,
             memberDps,
@@ -1459,7 +1487,7 @@
           q("#allMapRows").innerHTML = rows
             .map(
               ({ map, result }) =>
-                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name"><a class="osms-link" href="${osmsMapUrl(map)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${map.name} ↗</a></td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td></tr>`,
+                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name"><a class="osms-link" href="${osmsMapUrl(map)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${map.name} ↗</a></td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td><td>${fmt(result.grossMeso)}</td></tr>`,
             )
             .join("");
           q("#allMapRows")
