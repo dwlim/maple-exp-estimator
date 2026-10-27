@@ -1500,8 +1500,7 @@
               : null,
             useBasicAttack =
               !!basicResult &&
-              Math.abs(basicResult.perPlayer - skillResult.perPlayer) <
-                0.000001,
+              basicResult.attacksRequired === skillResult.attacksRequired,
             memberDps = useBasicAttack ? basicDps : skillDps,
             memberAttackSeconds = useBasicAttack
               ? basicAttackSeconds
@@ -1600,8 +1599,7 @@
                     : null,
                   useBasicAttack =
                     !!basicResult &&
-                    Math.abs(basicResult.perPlayer - skillResult.perPlayer) <
-                      0.000001,
+                    basicResult.attacksRequired === skillResult.attacksRequired,
                   result = useBasicAttack ? basicResult : skillResult;
                 return { map, result, useBasicAttack };
               })
