@@ -721,9 +721,9 @@
                   HP potion cost only.
                 </li>
                 <li>
-                  MP cost assumes one skill cast per attack: Power Strike 6,
-                  Magic Claw 20, Arrow Blow 14, Lucky Seven 8, Savage Blow 16,
-                  Holy Arrow 14, and elemental mage skills 20 MP.
+                  MP cost assumes one max-rank skill cast per attack: Power
+                  Strike 12, Magic Claw 20, Arrow Blow 14, Lucky Seven 16,
+                  Savage Blow 28, Holy Arrow 28, and Fire Arrow/Cold Beam 28 MP.
                 </li>
                 <li>
                   Gross mesos use the OSMS estimate: base drop is
@@ -1164,16 +1164,16 @@
           return job === "Magician"
             ? 20
             : job === "Cleric"
-              ? 14
+              ? 28
               : job === "Fire/Poison" || job === "Ice/Lightning"
-              ? 20
-              : job === "Assassin"
-                ? 8
-                : job === "Bowman"
-                  ? 14
-                  : job === "Bandit"
-                    ? 16
-                    : 6;
+                ? 28
+                : job === "Assassin"
+                  ? 16
+                  : job === "Bowman"
+                    ? 14
+                    : job === "Bandit"
+                      ? 28
+                      : 12;
         }
         const armorWdefByFamily = {
           Warrior: [
