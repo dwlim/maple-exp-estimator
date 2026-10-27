@@ -1186,6 +1186,24 @@
                       ? banditDps(level)
                       : spearDps(level);
         }
+        function basicAttackDps(job, level) {
+          const l = Math.max(10, Math.min(70, Math.round(level))),
+            mastery = l < 30 ? 0.6 : 0.9;
+          if (["Magician", "Cleric", "Fire/Poison", "Ice/Lightning"].includes(job)) return 0;
+          if (job === "Assassin" || job === "Bandit") {
+            const w = weaponAtLevel(job === "Assassin" ? clawProgression : daggerProgression, l),
+              damage = (primaryStat(l) * 3.6 + 25 + Math.floor((l - 10) * 0.5) + w[1]) * mastery;
+            return Math.max(1, Math.round(damage / ATTACK_SECONDS));
+          }
+          if (job === "Bowman") {
+            const w = weaponAtLevel(bowProgression, l),
+              damage = (primaryStat(l) * 3.4 + 25 + Math.floor((l - 10) * 0.5) + w[1]) * mastery;
+            return Math.max(1, Math.round(damage / ATTACK_SECONDS));
+          }
+          const w = weaponAtLevel(spearProgression, l),
+            damage = (((primaryStat(l) * 4.5 * 0.9 + 25) + (primaryStat(l) * 5 + 25)) / 2) * w[1] / 100 * mastery;
+          return Math.max(1, Math.round(damage / ATTACK_SECONDS));
+        }
         function skillMpCost(job) {
           return job === "Magician"
             ? 20
@@ -1290,6 +1308,7 @@
           warriorWdef,
           job = "Warrior",
           playerLevel = 30,
+          useBasicAttack = false,
         ) {
           const warriorAttackSeconds = ATTACK_SECONDS,
             { selectedMembers, warriorMembers } = partyComposition(party),
@@ -1371,7 +1390,7 @@
               (monsterDamage * avoidance.contactFactor * clears) / party,
             mpPerCharacter =
               ((clears * clearSeconds) / memberAttackSeconds) *
-              skillMpCost(job),
+              useBasicAttack ? 0 : skillMpCost(job),
             grossMeso = map.mobs.reduce(
               (total, m) =>
                 total +
@@ -1400,6 +1419,7 @@
             mesoPerCharacter: hpPerCharacter / 2,
             mpPerCharacter,
             mpMesoPerCharacter: mpPerCharacter,
+            useBasicAttack,
             grossMeso,
             netMeso: grossMeso - hpPerCharacter / 2 - mpPerCharacter,
             perPlayer: selectedExp,
@@ -1423,7 +1443,12 @@
             return;
           }
           const job = q("#job").value,
-            memberDps = classDps(job, level),
+            skillDps = classDps(job, level),
+            skillAttackSeconds = classAttackSeconds(job, level),
+            basicDps = basicAttackDps(job, level),
+            useBasicAttack = basicDps > 0 && basicDps * ATTACK_SECONDS >= skillDps * skillAttackSeconds,
+            memberDps = useBasicAttack ? basicDps : skillDps,
+            memberAttackSeconds = useBasicAttack ? ATTACK_SECONDS : skillAttackSeconds,
             warriorDps = spearDps(level),
             memberWdef = classWdef(job, level),
             warriorWdef = estimatedWdef(level),
@@ -1433,7 +1458,7 @@
               party,
               memberDps,
               warriorDps,
-              classAttackSeconds(job, level),
+              memberAttackSeconds,
               job === "Assassin"
                 ? 0.5
                 : job === "Magician" ||
@@ -1449,6 +1474,7 @@
               warriorWdef,
               job,
               level,
+              useBasicAttack,
             );
           q("#perPlayer").textContent = fmt(result.perPlayer);
           q("#partyRate").textContent = fmt(result.partyRate);
@@ -1462,7 +1488,7 @@
           q("#clears").textContent = fmt1(result.clears);
           q("#avoidance").textContent = result.avoidance.label;
           q("#mesoCost").textContent = fmt(result.mesoPerCharacter);
-          q("#mpCost").textContent = fmt(result.mpMesoPerCharacter);
+          q("#mpCost").textContent = `${fmt(result.mpMesoPerCharacter)}${result.useBasicAttack ? " (basic attack)" : ""}`;
           q("#grossMeso").textContent = fmt(result.grossMeso);
           q("#netMeso").textContent = fmt(result.netMeso);
           renderAllResults(
@@ -1485,6 +1511,7 @@
             warriorWdef,
             job,
             level,
+            useBasicAttack,
           );
         }
         function renderAllResults(
@@ -1498,6 +1525,7 @@
           warriorWdef,
           job = "Warrior",
           playerLevel = 30,
+          useBasicAttack = false,
         ) {
            const query = (q("#mapSearch")?.value || "").trim().toLowerCase(),
              sortBy = q("#mapSort")?.value || "xp",
