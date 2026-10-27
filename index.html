@@ -1188,21 +1188,22 @@
         }
         function basicAttackDps(job, level) {
           const l = Math.max(10, Math.min(70, Math.round(level))),
-            mastery = l < 30 ? 0.6 : 0.9;
+            mastery = l < 30 ? 0.6 : 0.9,
+            attackSeconds = classAttackSeconds(job, l);
           if (["Magician", "Cleric", "Fire/Poison", "Ice/Lightning"].includes(job)) return 0;
           if (job === "Assassin" || job === "Bandit") {
             const w = weaponAtLevel(job === "Assassin" ? clawProgression : daggerProgression, l),
               damage = (primaryStat(l) * 3.6 + 25 + Math.floor((l - 10) * 0.5) + w[1]) * mastery;
-            return Math.max(1, Math.round(damage / ATTACK_SECONDS));
+            return Math.max(1, Math.round(damage / attackSeconds));
           }
           if (job === "Bowman") {
             const w = weaponAtLevel(bowProgression, l),
               damage = (primaryStat(l) * 3.4 + 25 + Math.floor((l - 10) * 0.5) + w[1]) * mastery;
-            return Math.max(1, Math.round(damage / ATTACK_SECONDS));
+            return Math.max(1, Math.round(damage / attackSeconds));
           }
           const w = weaponAtLevel(spearProgression, l),
             damage = (((primaryStat(l) * 4.5 * 0.9 + 25) + (primaryStat(l) * 5 + 25)) / 2) * w[1] / 100 * mastery;
-          return Math.max(1, Math.round(damage / ATTACK_SECONDS));
+          return Math.max(1, Math.round(damage / attackSeconds));
         }
         function skillMpCost(job) {
           return job === "Magician"
@@ -1446,9 +1447,10 @@
             skillDps = classDps(job, level),
             skillAttackSeconds = classAttackSeconds(job, level),
             basicDps = basicAttackDps(job, level),
-            useBasicAttack = basicDps > 0 && basicDps * ATTACK_SECONDS >= skillDps * skillAttackSeconds,
+            basicAttackSeconds = classAttackSeconds(job, level),
+            useBasicAttack = basicDps > 0 && basicDps * basicAttackSeconds >= skillDps * skillAttackSeconds,
             memberDps = useBasicAttack ? basicDps : skillDps,
-            memberAttackSeconds = useBasicAttack ? ATTACK_SECONDS : skillAttackSeconds,
+            memberAttackSeconds = useBasicAttack ? basicAttackSeconds : skillAttackSeconds,
             warriorDps = spearDps(level),
             memberWdef = classWdef(job, level),
             warriorWdef = estimatedWdef(level),
