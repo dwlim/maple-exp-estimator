@@ -1352,7 +1352,15 @@
                     : 0)) /
               party,
             combatAndMovement = Math.max(clearSeconds, movement),
-            cycle = Math.max(combatAndMovement, OSMS_SPAWN_CYCLE),
+            // Movement overlaps combat, but difficult routes still create
+            // repositioning, platform, and drop-time overhead. Charge a
+            // bounded portion of the smaller workload instead of treating
+            // movement as either fully additive or completely free.
+            traversalOverhead = Math.min(clearSeconds, movement) * 0.75,
+            cycle = Math.max(
+              combatAndMovement + traversalOverhead,
+              OSMS_SPAWN_CYCLE,
+            ),
             clears = ((3600 / cycle) * uptime) / 100,
             partyRate = totalExp * clears * partyExpMultiplier(party),
             selectedDpsShare =
