@@ -655,6 +655,7 @@
                 <span>Total EXP / hour</span><span id="partyRate">—</span>
               </div>
               <div><span>Member DPS</span><span id="estimatedDps">—</span></div>
+              <div><span>Attack method</span><span id="attackMethod">—</span></div>
               <div>
                 <span>Player WDEF</span><span id="estimatedWdef">—</span>
               </div>
@@ -1519,9 +1520,9 @@
           q("#avoidance").textContent = result.avoidance.label;
           q("#mesoCost").textContent = fmt(result.mesoPerCharacter);
           q("#mpCost").textContent = `${fmt(result.mpMesoPerCharacter)}${result.useBasicAttack ? " (basic attack)" : ""}`;
-          q("#estimatedDps").previousElementSibling.textContent = result.useBasicAttack
-            ? "Member DPS (basic attack)"
-            : "Member DPS (skill)";
+          q("#attackMethod").textContent = result.useBasicAttack
+            ? "Basic attack"
+            : "Skill";
           q("#grossMeso").textContent = fmt(result.grossMeso);
           q("#netMeso").textContent = fmt(result.netMeso);
           renderAllResults(
