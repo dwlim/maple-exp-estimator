@@ -799,8 +799,9 @@
              monsters more than 3 levels higher</label
            ><label for="mapSort">Sort by
              <select id="mapSort" class="map-sort" aria-label="Sort map results">
-               <option value="xp">EXP/hour</option>
-               <option value="netMeso">Net mesos/hour</option>
+                <option value="xp">EXP/hour</option>
+                <option value="grossMeso">Gross mesos/hour</option>
+                <option value="netMeso">Net mesos/hour</option>
              </select>
            </label>
         </div>
@@ -1511,8 +1512,18 @@
                 return { map, result };
               })
                .sort((a, b) => {
-                 const aValue = sortBy === "netMeso" ? a.result.netMeso : a.result.perPlayer,
-                   bValue = sortBy === "netMeso" ? b.result.netMeso : b.result.perPlayer;
+                  const aValue =
+                      sortBy === "netMeso"
+                        ? a.result.netMeso
+                        : sortBy === "grossMeso"
+                          ? a.result.grossMeso
+                          : a.result.perPlayer,
+                    bValue =
+                      sortBy === "netMeso"
+                        ? b.result.netMeso
+                        : sortBy === "grossMeso"
+                          ? b.result.grossMeso
+                          : b.result.perPlayer;
                  return bValue - aValue || a.map.name.localeCompare(b.map.name);
                });
           q("#allMapRows").innerHTML = rows
