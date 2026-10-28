@@ -921,9 +921,10 @@
         function baseMovementSeconds(map, party) {
           const p = map.positions || [];
           if (p.length < 2) return 0;
-          // A practical party can hold separate horizontal/vertical boxes. Keep
-          // points on the same platform together before splitting the map into
-          // party areas, rather than making every member cover a mixed route.
+          // Keep points on the same platform together, but let a large platform
+          // receive multiple party coverage areas. This models, for example,
+          // one player on each smaller platform and two players sharing a long
+          // bottom platform.
           const platformTolerance = 180;
           const platformGroups = [];
           [...p].sort((a, b) => a[1] - b[1]).forEach((point) => {
@@ -933,66 +934,59 @@
             if (group) group.points.push(point);
             else platformGroups.push({ y: point[1], points: [point] });
           });
-          const groupedPoints = platformGroups.flatMap((group) => group.points);
-          const xs = groupedPoints.map((point) => point[0]),
+          const groupedPoints = platformGroups.flatMap((group) => group.points),
+            xs = groupedPoints.map((point) => point[0]),
             ys = groupedPoints.map((point) => point[1]),
-            xSpan = Math.max(...xs) - Math.min(...xs),
-            ySpan = Math.max(...ys) - Math.min(...ys),
-            axis = xSpan >= ySpan ? 0 : 1,
-            areas = Math.min(Math.max(1, party), platformGroups.length),
+            axis = Math.max(...xs) - Math.min(...xs) >= Math.max(...ys) - Math.min(...ys) ? 0 : 1,
+            areas = Math.min(Math.max(1, party), p.length),
             orderedGroups = [...platformGroups].sort(
               (a, b) =>
-                a.points.reduce((sum, point) => sum + point[axis], 0) /
-                  a.points.length -
-                b.points.reduce((sum, point) => sum + point[axis], 0) /
-                  b.points.length,
+                a.points.reduce((sum, point) => sum + point[axis], 0) / a.points.length -
+                b.points.reduce((sum, point) => sum + point[axis], 0) / b.points.length,
             ),
-            coverage = [],
-            mobFactor = Math.max(1, activeMobCount(map) / p.length);
-          let groupIndex = 0;
-          for (let area = 0; area < areas; area++) {
-            const remainingAreas = areas - area,
-              remainingPoints = orderedGroups
-                .slice(groupIndex)
-                .reduce((sum, group) => sum + group.points.length, 0),
-              targetPoints = remainingPoints / remainingAreas,
-              groups = [],
-              groupsAvailable = orderedGroups.length - groupIndex - remainingAreas + 1;
-            let pointCount = 0;
-            while (groups.length < groupsAvailable) {
-              const group = orderedGroups[groupIndex++];
-              groups.push(group);
-              pointCount += group.points.length;
-              if (pointCount >= targetPoints) {
-                break;
-              }
-            }
-            coverage.push(groups.flatMap((group) => group.points));
+            allocations = orderedGroups.map(() => 1);
+          for (let extra = orderedGroups.length; extra < areas; extra++) {
+            const largest = orderedGroups.reduce(
+              (best, group, index) =>
+                group.points.length / allocations[index] >
+                orderedGroups[best].points.length / allocations[best]
+                  ? index
+                  : best,
+              0,
+            );
+            allocations[largest] += 1;
           }
+          const coverage = orderedGroups.flatMap((group, index) => {
+            const points = [...group.points].sort((a, b) => a[axis] - b[axis]);
+            return Array.from({ length: allocations[index] }, (_, area) =>
+              points.slice(
+                Math.floor((area * points.length) / allocations[index]),
+                Math.floor(((area + 1) * points.length) / allocations[index]),
+              ),
+            );
+          });
+          const mobFactor = Math.max(1, activeMobCount(map) / p.length);
           let slowest = 0;
           for (const points of coverage) {
             if (!points.length) continue;
-            const sweepDistance = points
-               .slice(1)
-               .reduce(
-                 (distance, point, i) =>
-                   distance +
-                   Math.hypot(
-                     point[0] - points[i][0],
-                     point[1] - points[i][1],
-                   ),
-                 0,
-               ),
-               areaXs = points.map((point) => point[0]),
-               areaYs = points.map((point) => point[1]),
-               areaDiagonal = Math.hypot(
-                 Math.max(...areaXs) - Math.min(...areaXs),
-                 Math.max(...areaYs) - Math.min(...areaYs),
-               );
-             slowest = Math.max(
-               slowest,
-               (sweepDistance * 0.25 + areaDiagonal * 0.1) * mobFactor,
-             );
+            const sweepDistance = points.slice(1).reduce(
+              (distance, point, i) =>
+                distance + Math.hypot(
+                  point[0] - points[i][0],
+                  point[1] - points[i][1],
+                ),
+              0,
+            );
+            const areaXs = points.map((point) => point[0]);
+            const areaYs = points.map((point) => point[1]);
+            const areaDiagonal = Math.hypot(
+              Math.max(...areaXs) - Math.min(...areaXs),
+              Math.max(...areaYs) - Math.min(...areaYs),
+            );
+            slowest = Math.max(
+              slowest,
+              (sweepDistance * 0.25 + areaDiagonal * 0.1) * mobFactor,
+            );
           }
           return slowest / MOVE_SPEED;
         }
