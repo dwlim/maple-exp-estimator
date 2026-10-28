@@ -1066,13 +1066,17 @@
               0;
           return allocated + equipment;
         }
+        function masteryAtLevel(level) {
+          const l = Math.max(10, Math.min(70, Math.round(level)));
+          return l < 30 ? 0.6 : Math.min(0.9, 0.6 + ((l - 30) / 8) * 0.3);
+        }
         function spearDps(level) {
           const l = Math.max(10, Math.min(70, Math.round(level))),
             w = weaponAtLevel(spearProgression, l),
             str = primaryStat(l),
             dex = 25,
             skill = l < 30 ? 1 + ((l - 10) / 20) * 1.6 : 2.6,
-            mastery = l < 30 ? 0.6 : 0.9,
+            mastery = masteryAtLevel(l),
             averageWeaponDamage = ((str * 4.5 * 0.9 + dex) + (str * 5 + dex)) / 2 * w[1] / 100;
           return Math.max(1, Math.round(averageWeaponDamage * skill * mastery / speedSeconds[w[2]]));
         }
@@ -1087,7 +1091,7 @@
             luk = primaryStat(l),
             dex = 25 + Math.floor((l - 10) * 0.5),
             w = weaponAtLevel(clawProgression, l),
-            mastery = l < 30 ? 0.6 : 0.9,
+            mastery = masteryAtLevel(l),
             averageLucky7 = (luk * 3.6 + dex + w[1]) * 1.4 * 2 * mastery;
           return Math.max(1, Math.round(averageLucky7 / speedSeconds[w[2]]));
         }
@@ -1096,7 +1100,7 @@
             dex = primaryStat(l),
             str = 25 + Math.floor((l - 10) * 0.5),
             w = weaponAtLevel(bowProgression, l),
-            mastery = l < 30 ? 0.6 : 0.9,
+            mastery = masteryAtLevel(l),
             arrowBlow = (dex * 3.4 + str + w[1]) * 2.4 * mastery;
           return Math.max(1, Math.round(arrowBlow / speedSeconds[w[2]]));
         }
@@ -1105,7 +1109,7 @@
             luk = primaryStat(l),
             dex = 25 + Math.floor((l - 10) * 0.5),
             w = weaponAtLevel(daggerProgression, l),
-            mastery = l < 30 ? 0.6 : 0.9,
+            mastery = masteryAtLevel(l),
             savageBlow = (luk * 3.6 + dex + w[1]) * 4.5 * mastery;
           return Math.max(1, Math.round(savageBlow / speedSeconds[w[2]]));
         }
