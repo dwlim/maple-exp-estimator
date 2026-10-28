@@ -1226,6 +1226,18 @@
                       ? 28
                       : 12;
         }
+        // Damage is not identical on every attack. Sampling a bounded damage
+        // range keeps hit-count thresholds meaningful without making one level
+        // appear to double farming speed when it crosses a single threshold.
+        function expectedAttacksToKill(hp, averageDamage) {
+          const samples = 41,
+            minimum = 0.8,
+            maximum = 1.2;
+          return Array.from({ length: samples }, (_, index) => {
+            const roll = minimum + ((maximum - minimum) * index) / (samples - 1);
+            return Math.ceil(hp / Math.max(1, averageDamage * roll));
+          }).reduce((sum, attacks) => sum + attacks, 0) / samples;
+        }
         const armorWdefByFamily = {
           Warrior: [
             [10, 30], [15, 50], [20, 78], [25, 112], [30, 151],
@@ -1345,7 +1357,7 @@
                   party;
               return (
                 n +
-                Math.ceil(m[1] / Math.max(1, effectiveDamage)) *
+                expectedAttacksToKill(m[1], Math.max(1, effectiveDamage)) *
                   m[3] *
                   mobFactor
               );
