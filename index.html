@@ -655,7 +655,6 @@
                 <span>Total EXP / hour</span><span id="partyRate">—</span>
               </div>
               <div><span>Member DPS</span><span id="estimatedDps">—</span></div>
-              <div><span>Attack method</span><span id="attackMethod">—</span></div>
               <div>
                 <span>Player WDEF</span><span id="estimatedWdef">—</span>
               </div>
@@ -813,7 +812,6 @@
                 <th>Map</th>
                 <th>Region</th>
                 <th>EXP/hour / char<br /><small>current party</small></th>
-                <th>Attack method</th>
                 <th>Max mob count</th>
                 <th>Spawn rate</th>
                 <th>Cycle<br /><small>current party</small></th>
@@ -1207,10 +1205,6 @@
                     ? 1.5
                     : 2.6;
         }
-        function basicAttackDps(job, level) {
-          if (["Magician", "Cleric", "Fire/Poison", "Ice/Lightning"].includes(job)) return 0;
-          return Math.max(1, classDps(job, level) / skillModifier(job));
-        }
         function skillMpCost(job) {
           return job === "Magician"
             ? 20
@@ -1327,7 +1321,6 @@
           warriorWdef,
           job = "Warrior",
           playerLevel = 30,
-          useBasicAttack = false,
         ) {
           const warriorAttackSeconds = ATTACK_SECONDS,
             { selectedMembers, warriorMembers } = partyComposition(party),
@@ -1407,7 +1400,7 @@
               (monsterDamage * avoidance.contactFactor * clears) / party,
             mpPerCharacter =
               ((clears * clearSeconds) / memberAttackSeconds) *
-              (useBasicAttack ? 0 : skillMpCost(job)),
+              skillMpCost(job),
             grossMeso = map.mobs.reduce(
               (total, m) =>
                 total +
@@ -1435,63 +1428,10 @@
             mesoPerCharacter: hpPerCharacter / 2,
             mpPerCharacter,
             mpMesoPerCharacter: mpPerCharacter,
-            useBasicAttack,
             grossMeso,
             netMeso: grossMeso - hpPerCharacter / 2 - mpPerCharacter,
             perPlayer: selectedExp,
           };
-        }
-        function basicAttackRemainsPreferred(map, party, job, level, uptime) {
-          const finalStabilityLevel = Math.max(level, 38);
-          for (let futureLevel = level; futureLevel <= finalStabilityLevel; futureLevel += 1) {
-            const skillDps = classDps(job, futureLevel),
-              skillAttackSeconds = classAttackSeconds(job, futureLevel),
-              basicDps = basicAttackDps(job, futureLevel);
-            if (!basicDps) return false;
-            const movementPenalty =
-                job === "Assassin"
-                  ? 0.5
-                  : job === "Magician" ||
-                      job === "Cleric" ||
-                      job === "Fire/Poison" ||
-                      job === "Ice/Lightning"
-                    ? 0.5
-                    : job === "Bowman"
-                      ? 0.75
-                      : 1,
-              warriorDps = spearDps(futureLevel),
-              memberWdef = classWdef(job, futureLevel),
-              warriorWdef = estimatedWdef(futureLevel),
-              skillResult = estimate(
-                map,
-                party,
-                skillDps,
-                warriorDps,
-                skillAttackSeconds,
-                movementPenalty,
-                uptime,
-                memberWdef,
-                warriorWdef,
-                job,
-                futureLevel,
-              ),
-              basicResult = estimate(
-                map,
-                party,
-                basicDps,
-                warriorDps,
-                skillAttackSeconds,
-                movementPenalty,
-                uptime,
-                memberWdef,
-                warriorWdef,
-                job,
-                futureLevel,
-                true,
-              );
-            if (skillResult.cycle / basicResult.cycle < 0.95) return false;
-          }
-          return true;
         }
         function calc() {
           const party = Math.max(1, +q("#partySize").value || 1),
@@ -1511,7 +1451,6 @@
           const job = q("#job").value,
             skillDps = classDps(job, level),
             skillAttackSeconds = classAttackSeconds(job, level),
-            basicDps = basicAttackDps(job, level),
             warriorDps = spearDps(level),
             memberWdef = classWdef(job, level),
             warriorWdef = estimatedWdef(level),
@@ -1540,30 +1479,9 @@
               job,
               level,
             ),
-            basicResult = basicDps
-              ? estimate(
-                  model,
-                  party,
-                  basicDps,
-                  warriorDps,
-                  skillAttackSeconds,
-                  movementPenalty,
-                  uptime,
-                  memberWdef,
-                  warriorWdef,
-                  job,
-                  level,
-                  true,
-                )
-              : null,
-            useBasicAttack =
-              !!basicResult &&
-              basicAttackRemainsPreferred(model, party, job, level, uptime),
-            memberDps = useBasicAttack ? basicDps : skillDps,
-            memberAttackSeconds = useBasicAttack
-              ? skillAttackSeconds
-              : skillAttackSeconds,
-            result = useBasicAttack ? basicResult : skillResult;
+            memberDps = skillDps,
+            memberAttackSeconds = skillAttackSeconds,
+            result = skillResult;
           q("#perPlayer").textContent = fmt(result.perPlayer);
           q("#partyRate").textContent = fmt(result.partyRate);
           q("#estimatedDps").textContent = fmt(memberDps);
@@ -1576,17 +1494,14 @@
           q("#clears").textContent = fmt1(result.clears);
           q("#avoidance").textContent = result.avoidance.label;
           q("#mesoCost").textContent = fmt(result.mesoPerCharacter);
-          q("#mpCost").textContent = `${fmt(result.mpMesoPerCharacter)}${result.useBasicAttack ? " (basic attack)" : ""}`;
-          q("#attackMethod").textContent = result.useBasicAttack
-            ? "Basic attack"
-            : "Skill";
+           q("#mpCost").textContent = fmt(result.mpMesoPerCharacter);
+
           q("#grossMeso").textContent = fmt(result.grossMeso);
           q("#netMeso").textContent = fmt(result.netMeso);
           renderAllResults(
             party,
             skillDps,
-            basicDps,
-            warriorDps,
+              warriorDps,
              skillAttackSeconds,
              movementPenalty,
              uptime,
@@ -1599,7 +1514,6 @@
         function renderAllResults(
           party,
           skillDps,
-          basicDps,
           warriorDps,
           skillAttackSeconds,
           memberMovementPenalty,
@@ -1627,28 +1541,8 @@
                     warriorWdef,
                     job,
                     playerLevel,
-                  ),
-                  basicResult = basicDps
-                    ? estimate(
-                        map,
-                        party,
-                        basicDps,
-                        warriorDps,
-                        skillAttackSeconds,
-                        memberMovementPenalty,
-                        uptime,
-                        memberWdef,
-                        warriorWdef,
-                        job,
-                        playerLevel,
-                        true,
-                      )
-                    : null,
-                  useBasicAttack =
-                    !!basicResult &&
-                    basicAttackRemainsPreferred(map, party, job, playerLevel, uptime),
-                  result = useBasicAttack ? basicResult : skillResult;
-                return { map, result, useBasicAttack };
+                  );
+                return { map, result: skillResult };
               })
                .sort((a, b) => {
                   const aValue =
@@ -1667,8 +1561,8 @@
                });
           q("#allMapRows").innerHTML = rows
             .map(
-              ({ map, result, useBasicAttack }) =>
-                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name"><a class="osms-link" href="${osmsMapUrl(map)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${escapeHtml(map.name)} ↗</a></td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${useBasicAttack ? "Basic attack" : "Skill"}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td><td>${fmt(result.grossMeso)}</td><td>${fmt(result.netMeso)}</td></tr>`,
+              ({ map, result }) =>
+                `<tr class="map-row${map.id === selected ? " selected" : ""}" data-map-id="${map.id}"><td class="map-name"><a class="osms-link" href="${osmsMapUrl(map)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${escapeHtml(map.name)} ↗</a></td><td>${map.region}</td><td>${fmt(result.perPlayer)}</td><td>${fmt(activeMobCount(map, party))}</td><td>${fmt1(map.mobRate)}×</td><td>${fmtTime(result.cycle)}</td><td>HP: ${fmt(result.mesoPerCharacter)}<br>MP: ${fmt(result.mpMesoPerCharacter)}</td><td>${fmt(result.grossMeso)}</td><td>${fmt(result.netMeso)}</td></tr>`,
             )
             .join("");
           q("#allMapRows")
