@@ -1437,8 +1437,6 @@
               : ALL_VICTORIA_MAPS;
           if (available.length && available.length !== VICTORIA_MAPS.length) {
             VICTORIA_MAPS = available;
-            if (!VICTORIA_MAPS.some((map) => map.id === selected))
-              selected = VICTORIA_MAPS[0].id;
             render();
             return;
           }
