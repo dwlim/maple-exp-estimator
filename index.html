@@ -1430,7 +1430,8 @@
           };
         }
         function basicAttackRemainsPreferred(map, party, job, level, uptime) {
-          for (let futureLevel = level; futureLevel <= 70; futureLevel += 1) {
+          const finalStabilityLevel = Math.max(level, 38);
+          for (let futureLevel = level; futureLevel <= finalStabilityLevel; futureLevel += 1) {
             const skillDps = classDps(job, futureLevel),
               skillAttackSeconds = classAttackSeconds(job, futureLevel),
               basicDps = basicAttackDps(job, futureLevel);
