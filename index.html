@@ -1494,7 +1494,7 @@
               : null,
             useBasicAttack =
               !!basicResult &&
-              Math.abs(basicResult.cycle - skillResult.cycle) <= 1e-9,
+              skillResult.cycle / basicResult.cycle >= 0.95,
             memberDps = useBasicAttack ? basicDps : skillDps,
             memberAttackSeconds = useBasicAttack
               ? skillAttackSeconds
@@ -1592,7 +1592,7 @@
                     : null,
                   useBasicAttack =
                     !!basicResult &&
-                    Math.abs(basicResult.cycle - skillResult.cycle) <= 1e-9,
+                    skillResult.cycle / basicResult.cycle >= 0.95,
                   result = useBasicAttack ? basicResult : skillResult;
                 return { map, result, useBasicAttack };
               })
