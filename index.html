@@ -1353,8 +1353,8 @@
               (best, group, i) => group.points.length < coverageGroups[best].points.length ? i : best,
               1,
             );
-            const previous = coverageGroups[index - 1];
-            previous.points.push(...coverageGroups[index].points);
+            const mergeInto = index === 0 ? 1 : index - 1;
+            coverageGroups[mergeInto].points.push(...coverageGroups[index].points);
             coverageGroups.splice(index, 1);
           }
           const allocations = coverageGroups.map(() => 1);
