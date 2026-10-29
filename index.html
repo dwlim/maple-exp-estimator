@@ -1462,7 +1462,7 @@
               0,
             ),
             clearSeconds =
-              (attacksRequired * damagePerAttack) / (averageDps * party),
+              (attacksRequired * damagePerAttack) / averageDps,
             movementPenaltiesValue = movementPenalties(map, party),
             movement =
               (movementPenaltiesValue.melee * warriorMembers +
