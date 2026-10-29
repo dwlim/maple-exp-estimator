@@ -570,7 +570,6 @@
       .coverage-diagram strong { display: block; margin-bottom: .45rem; }
       .coverage-diagram svg { display: block; width: 100%; height: auto; min-height: 180px; background: #0b1220; border-radius: 8px; }
       .coverage-diagram text { font: 700 18px system-ui, sans-serif; }
-      .coverage-platform { stroke: #e5e7eb; stroke-width: 10; stroke-linecap: round; opacity: .9; filter: drop-shadow(0 2px 2px #0008); }
       .coverage-diagram small { display: block; margin-top: .45rem; color: var(--muted); }
     </style>
   </head>
@@ -1360,24 +1359,7 @@
             );
             allocations[index] += 1;
           }
-          const platformSegments = map.name === "Damp Forest"
-              ? [
-                  [675, 1254, 648],
-                  [676, 1321, 1908],
-                  [125, 853, 2388],
-                  [961, 1598, 2388],
-                ]
-              : groups.map((group) => [
-                  Math.min(...group.points.map((point) => point[0])) - 55,
-                  Math.max(...group.points.map((point) => point[0])) + 55,
-                  group.y,
-                ]),
-            platforms = hasRealMinimap
-              ? ""
-              : platformSegments
-                  .map(([x1, x2, y]) => `<line x1="${sx(x1)}" y1="${sy(y)}" x2="${sx(x2)}" y2="${sy(y)}" class="coverage-platform"/>`)
-                  .join(""),
-            labels = [],
+          const labels = [],
             regions = [];
           groups.forEach((group, groupIndex) => {
             const sorted = [...group.points].sort((a, b) => a[0] - b[0]);
@@ -1402,7 +1384,7 @@
             }
           });
           const dots = points.map((point) => `<circle cx="${sx(point[0])}" cy="${sy(point[1])}" r="5" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>`).join("");
-          target.innerHTML = `<svg viewBox="0 0 1000 500" role="img" aria-label="Spawn positions and approximate party coverage for ${escapeHtml(map.name)}">${platforms}${regions.join("")}${dots}${labels.join("")}</svg>`;
+          target.innerHTML = `<svg viewBox="0 0 1000 500" role="img" aria-label="Spawn positions and approximate party coverage for ${escapeHtml(map.name)}">${regions.join("")}${dots}${labels.join("")}</svg>`;
         }
         function render() {
           model = mapById[selected];
