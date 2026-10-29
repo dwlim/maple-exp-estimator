@@ -1524,13 +1524,6 @@
                 ),
               )
             : ALL_VICTORIA_MAPS;
-            available = q("#levelFilter").checked
-              ? ALL_VICTORIA_MAPS.filter((map) =>
-                  map.mobs.every(
-                    (mob) => (OSMS_MONSTER_LEVELS[mob[0]] ?? 0) <= level + 3,
-                  ),
-                )
-              : ALL_VICTORIA_MAPS;
           if (available.length && available.length !== VICTORIA_MAPS.length) {
             VICTORIA_MAPS = available;
             render();
