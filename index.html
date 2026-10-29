@@ -632,10 +632,6 @@
             <label>Party size</label
             ><input id="partySize" type="number" min="1" max="6" value="4" />
           </div>
-          <div class="control">
-            <label>Uptime %</label
-            ><input id="uptime" type="number" min="1" max="100" value="80" />
-          </div>
         </div>
         <div class="map-overview">
           <div class="table-wrap">
@@ -703,7 +699,7 @@
               <h2>How this is calculated</h2>
               <p>
                 EXP/hour uses OSMS map spawn data, party clear speed, and your
-                uptime setting. The party is modeled as your selected job plus
+                continuous 100% uptime. The party is modeled as your selected job plus
                 Warriors for every other party member. Because members are
                 assumed to work separate mobs, your EXP is weighted by your
                 share of the party's effective DPS instead of divided equally.
@@ -1415,7 +1411,6 @@
           warriorDps,
           memberAttackSeconds,
           memberMovementPenalty,
-          uptime,
           memberWdef,
           warriorWdef,
           job = "Warrior",
@@ -1484,7 +1479,7 @@
             // Combat and movement run in parallel; the slower workload sets
             // the cycle, with the OSMS spawn-cycle floor as the minimum.
             cycle = Math.max(clearSeconds, movement, OSMS_SPAWN_CYCLE),
-            clears = ((3600 / cycle) * uptime) / 100,
+            clears = 3600 / cycle,
             partyRate = totalExp * clears * partyExpMultiplier(party),
             selectedExp = partyRate / party,
             avoidance = physicalAvoidance(map),
@@ -1547,7 +1542,6 @@
             warriorDps = spearDps(level),
             memberWdef = classWdef(job, level),
             warriorWdef = estimatedWdef(level),
-            uptime = Math.max(1, Math.min(100, +q("#uptime").value || 1)),
             movementPenalty =
               job === "Assassin"
                 ? 0.5
@@ -1566,7 +1560,6 @@
               warriorDps,
               skillAttackSeconds,
               movementPenalty,
-              uptime,
               memberWdef,
               warriorWdef,
               job,
@@ -1597,8 +1590,7 @@
               warriorDps,
              skillAttackSeconds,
              movementPenalty,
-             uptime,
-            memberWdef,
+             memberWdef,
             warriorWdef,
             job,
             level,
@@ -1610,8 +1602,7 @@
           warriorDps,
           skillAttackSeconds,
           memberMovementPenalty,
-          uptime,
-          memberWdef,
+           memberWdef,
           warriorWdef,
           job = "Warrior",
           playerLevel = 30,
@@ -1629,8 +1620,7 @@
                     warriorDps,
                     skillAttackSeconds,
                     memberMovementPenalty,
-                    uptime,
-                    memberWdef,
+                     memberWdef,
                     warriorWdef,
                     job,
                     playerLevel,
