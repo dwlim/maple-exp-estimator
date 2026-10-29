@@ -1347,34 +1347,17 @@
           });
           const colors = ["#38bdf8", "#a78bfa", "#f59e0b", "#34d399", "#fb7185", "#facc15"],
             areas = Math.min(Math.max(1, party), points.length),
-            coverageGroups = [...groups];
-          while (coverageGroups.length > areas) {
-            const index = coverageGroups.reduce(
-              (best, group, i) => group.points.length < coverageGroups[best].points.length ? i : best,
-              1,
-            );
-            const mergeInto = index === 0 ? 1 : index - 1;
-            coverageGroups[mergeInto].points.push(...coverageGroups[index].points);
-            coverageGroups.splice(index, 1);
-          }
-          const allocations = coverageGroups.map(() => 1);
-          for (let extra = coverageGroups.length; extra < areas; extra++) {
-            const index = coverageGroups.reduce(
-              (best, group, i) => group.points.length / allocations[i] > coverageGroups[best].points.length / allocations[best] ? i : best,
-              0,
-            );
-            allocations[index] += 1;
-          }
-          const labels = [],
+            balancedPoints = [...points].sort((a, b) => a[1] - b[1] || a[0] - b[0]),
+            coverageGroups = Array.from({ length: areas }, (_, area) =>
+              balancedPoints.slice(
+                Math.floor(area * balancedPoints.length / areas),
+                Math.floor((area + 1) * balancedPoints.length / areas),
+              ),
+            ),
+            labels = [],
             regions = [];
-          coverageGroups.forEach((group, groupIndex) => {
-            const sorted = [...group.points].sort((a, b) => a[0] - b[0]);
-            for (let area = 0; area < allocations[groupIndex]; area++) {
-              const covered = sorted.slice(
-                Math.floor(area * sorted.length / allocations[groupIndex]),
-                Math.floor((area + 1) * sorted.length / allocations[groupIndex]),
-              );
-              if (!covered.length) continue;
+          coverageGroups.forEach((covered) => {
+              if (!covered.length) return;
               const xs = covered.map((p) => sx(p[0])), ys = covered.map((p) => sy(p[1]));
               const padX = hasRealMinimap ? 3 : 32,
                 padY = hasRealMinimap ? 2 : 26,
@@ -1387,7 +1370,6 @@
               const color = colors[regions.length % colors.length], name = `Player ${regions.length + 1}`;
               regions.push(`<rect x="${left}" y="${top}" width="${Math.max(52, right - left)}" height="${Math.max(48, bottom - top)}" rx="12" fill="${color}" fill-opacity=".18" stroke="${color}" stroke-width="3"/>`);
               labels.push(`<text x="${(left + right) / 2}" y="${Math.max(hasRealMinimap ? 4 : 22, top - (hasRealMinimap ? 1 : 7))}" text-anchor="middle" fill="${color}">${name}</text>`);
-            }
           });
           const dots = points.map((point) => `<circle cx="${sx(point[0])}" cy="${sy(point[1])}" r="5" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>`).join("");
           target.innerHTML = `<svg viewBox="0 0 1000 500" role="img" aria-label="Spawn positions and approximate party coverage for ${escapeHtml(map.name)}">${regions.join("")}${dots}${labels.join("")}</svg>`;
