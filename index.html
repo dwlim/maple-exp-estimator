@@ -569,6 +569,9 @@
       .coverage-diagram { margin-top: 1rem; padding: .8rem; border: 1px solid var(--border); border-radius: 12px; background: rgba(15, 23, 42, .45); }
       .coverage-diagram strong { display: block; margin-bottom: .45rem; }
       .coverage-diagram svg { display: block; width: 100%; height: auto; min-height: 180px; background: #0b1220; border-radius: 8px; }
+      .coverage-map-real { position: relative; width: min(100%, 420px); margin: 0 auto; overflow: hidden; border-radius: 8px; background: #0b1220; }
+      .coverage-map-real img, .coverage-map-real svg { display: block; width: 100%; height: auto; min-height: 0; }
+      .coverage-map-real svg { position: absolute; inset: 0; background: transparent; }
       .coverage-diagram text { font: 700 18px system-ui, sans-serif; }
       .coverage-platform { stroke: #e5e7eb; stroke-width: 10; stroke-linecap: round; opacity: .9; filter: drop-shadow(0 2px 2px #0008); }
       .coverage-diagram small { display: block; margin-top: .45rem; color: var(--muted); }
@@ -1402,10 +1405,10 @@
             }
           });
           const dots = points.map((point) => `<circle cx="${sx(point[0])}" cy="${sy(point[1])}" r="5" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>`).join("");
-          const background = hasRealMinimap
-            ? `<image href="damp-forest-map.png" x="0" y="0" width="92" height="158" preserveAspectRatio="none"/>`
-            : "";
-          target.innerHTML = `<svg viewBox="0 0 ${hasRealMinimap ? "92 158" : "1000 500"}" role="img" aria-label="Party coverage over the real map layout for ${escapeHtml(map.name)}">${background}${platforms}${regions.join("")}${dots}${labels.join("")}</svg>`;
+          const overlay = `<svg viewBox="0 0 92 158" preserveAspectRatio="none" role="img" aria-label="Party coverage over the real map layout for ${escapeHtml(map.name)}">${regions.join("")}${dots}${labels.join("")}</svg>`;
+          target.innerHTML = hasRealMinimap
+            ? `<div class="coverage-map-real"><img src="damp-forest-map.png" width="92" height="158" alt="Damp Forest map platforms"><div>${overlay}</div></div>`
+            : `<svg viewBox="0 0 1000 500" role="img" aria-label="Approximate party coverage and platforms for ${escapeHtml(map.name)}">${platforms}${regions.join("")}${dots}${labels.join("")}</svg>`;
         }
         function render() {
           model = mapById[selected];
