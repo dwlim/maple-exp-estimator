@@ -688,9 +688,9 @@
           </div>
         </div>
         <div class="coverage-diagram" aria-labelledby="coverageTitle">
-          <strong id="coverageTitle">Party coverage</strong>
+          <strong id="coverageTitle">Map layout</strong>
           <div id="coverageDiagram"></div>
-          <small>Spawn positions and approximate coverage areas; colors identify each party member.</small>
+          <small>OSMS map artwork with spawn positions.</small>
         </div>
         <details class="info-expander">
           <summary>How this is calculated &amp; data assumptions</summary>
@@ -839,6 +839,7 @@
       </div>
     </main>
     <script src="maps-data.js"></script>
+    <script src="map-geometry.js"></script>
     <script src="patk-data.js"></script>
     <script src="monster-level-data.js"></script>
     <script>
@@ -1345,7 +1346,7 @@
           q("#selectedMapLink").href = osmsMapUrl(model);
           q("#customHint").textContent =
             `${VICTORIA_MAPS.length} Victoria Island maps with monsters no more than 3 levels above the player.`;
-          renderCoverageDiagram(model, Math.max(1, +q("#partySize").value || 1));
+          renderCoverageDiagram(model);
           q("#mobRows").innerHTML = model.mobs
             .map(
               (m, i) =>
