@@ -1347,17 +1347,27 @@
           });
           const colors = ["#38bdf8", "#a78bfa", "#f59e0b", "#34d399", "#fb7185", "#facc15"],
             areas = Math.min(Math.max(1, party), points.length),
-            allocations = groups.map(() => 1);
-          for (let extra = groups.length; extra < areas; extra++) {
-            const index = groups.reduce(
-              (best, group, i) => group.points.length / allocations[i] > groups[best].points.length / allocations[best] ? i : best,
+            coverageGroups = [...groups];
+          while (coverageGroups.length > areas) {
+            const index = coverageGroups.reduce(
+              (best, group, i) => group.points.length < coverageGroups[best].points.length ? i : best,
+              1,
+            );
+            const previous = coverageGroups[index - 1];
+            previous.points.push(...coverageGroups[index].points);
+            coverageGroups.splice(index, 1);
+          }
+          const allocations = coverageGroups.map(() => 1);
+          for (let extra = coverageGroups.length; extra < areas; extra++) {
+            const index = coverageGroups.reduce(
+              (best, group, i) => group.points.length / allocations[i] > coverageGroups[best].points.length / allocations[best] ? i : best,
               0,
             );
             allocations[index] += 1;
           }
           const labels = [],
             regions = [];
-          groups.forEach((group, groupIndex) => {
+          coverageGroups.forEach((group, groupIndex) => {
             const sorted = [...group.points].sort((a, b) => a[0] - b[0]);
             for (let area = 0; area < allocations[groupIndex]; area++) {
               const covered = sorted.slice(
@@ -1462,7 +1472,7 @@
               0,
             ),
             clearSeconds =
-              (attacksRequired * damagePerAttack) / averageDps,
+              (attacksRequired * damagePerAttack) / (averageDps * party),
             movementPenaltiesValue = movementPenalties(map, party),
             movement =
               (movementPenaltiesValue.melee * warriorMembers +
