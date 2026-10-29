@@ -1347,43 +1347,33 @@
           });
           const colors = ["#38bdf8", "#a78bfa", "#f59e0b", "#34d399", "#fb7185", "#facc15"],
             areas = Math.min(Math.max(1, party), points.length),
-            balancedPoints = [...points].sort((a, b) => a[1] - b[1] || a[0] - b[0]),
-            balancedGroups = Array.from({ length: areas }, (_, area) =>
-              balancedPoints.slice(
-                Math.floor(area * balancedPoints.length / areas),
-                Math.floor((area + 1) * balancedPoints.length / areas),
-              ),
-            ),
-            dampGroups =
-              map.name === "Damp Forest" && areas === 4 && groups.length >= 3
-                ? (() => {
-                    const sortedGroups = [...groups].sort((a, b) => a.y - b.y),
-                      bottom = [...sortedGroups.pop().points].sort((a, b) => a[0] - b[0]),
-                      split = Math.ceil(bottom.length / 2);
-                    return [
-                      ...sortedGroups.map((group) => group.points),
-                      bottom.slice(0, split),
-                      bottom.slice(split),
-                    ];
-                  })()
-                : balancedGroups,
-            coverageGroups = dampGroups,
+            viewWidth = hasRealMinimap ? 92 : 1000,
+            viewHeight = hasRealMinimap ? 158 : 500,
+            partition = (items, left, right, top, bottom, count) => {
+              if (count === 1) return [{ points: items, left, right, top, bottom }];
+              const xSpread = Math.max(...items.map((p) => sx(p[0]))) - Math.min(...items.map((p) => sx(p[0]))),
+                ySpread = Math.max(...items.map((p) => sy(p[1]))) - Math.min(...items.map((p) => sy(p[1]))),
+                splitX = xSpread >= ySpread,
+                sorted = [...items].sort((a, b) => splitX ? a[0] - b[0] : a[1] - b[1]),
+                leftCount = Math.floor(count / 2),
+                itemCount = Math.max(1, Math.floor(sorted.length * leftCount / count)),
+                split = sorted[itemCount - 1],
+                next = sorted[itemCount];
+              if (!next) return [{ points: items, left, right, top, bottom }];
+              const splitAt = splitX ? (sx(split[0]) + sx(next[0])) / 2 : (sy(split[1]) + sy(next[1])) / 2;
+              return [
+                ...partition(sorted.slice(0, itemCount), left, splitX ? splitAt : right, top, splitX ? bottom : splitAt, leftCount),
+                ...partition(sorted.slice(itemCount), splitX ? splitAt : left, right, splitX ? top : splitAt, bottom, count - leftCount),
+              ];
+            },
+            coverageGroups = partition(points, 1, viewWidth - 1, 1, viewHeight - 1, areas),
             labels = [],
             regions = [];
-          coverageGroups.forEach((covered) => {
-              if (!covered.length) return;
-              const xs = covered.map((p) => sx(p[0])), ys = covered.map((p) => sy(p[1]));
-              const padX = hasRealMinimap ? 3 : 32,
-                padY = hasRealMinimap ? 2 : 26,
-                viewWidth = hasRealMinimap ? 92 : 1000,
-                viewHeight = hasRealMinimap ? 158 : 500,
-                left = Math.max(1, Math.min(...xs) - padX),
-                right = Math.min(viewWidth - 1, Math.max(...xs) + padX),
-                top = Math.max(1, Math.min(...ys) - padY),
-                bottom = Math.min(viewHeight - 1, Math.max(...ys) + padY);
-              const color = colors[regions.length % colors.length], name = `Player ${regions.length + 1}`;
-              regions.push(`<rect x="${left}" y="${top}" width="${Math.max(52, right - left)}" height="${Math.max(48, bottom - top)}" rx="12" fill="${color}" fill-opacity=".18" stroke="${color}" stroke-width="3"/>`);
-              labels.push(`<text x="${(left + right) / 2}" y="${Math.max(hasRealMinimap ? 4 : 22, top - (hasRealMinimap ? 1 : 7))}" text-anchor="middle" fill="${color}">${name}</text>`);
+          coverageGroups.forEach((group) => {
+            const color = colors[regions.length % colors.length], name = `Player ${regions.length + 1}`,
+              left = group.left, right = group.right, top = group.top, bottom = group.bottom;
+            regions.push(`<rect x="${left}" y="${top}" width="${Math.max(52, right - left)}" height="${Math.max(48, bottom - top)}" rx="12" fill="${color}" fill-opacity=".18" stroke="${color}" stroke-width="3"/>`);
+            labels.push(`<text x="${(left + right) / 2}" y="${Math.max(hasRealMinimap ? 4 : 22, top + 16)}" text-anchor="middle" fill="${color}">${name}</text>`);
           });
           const dots = points.map((point) => `<circle cx="${sx(point[0])}" cy="${sy(point[1])}" r="5" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>`).join("");
           target.innerHTML = `<svg viewBox="0 0 1000 500" role="img" aria-label="Spawn positions and approximate party coverage for ${escapeHtml(map.name)}">${regions.join("")}${dots}${labels.join("")}</svg>`;
