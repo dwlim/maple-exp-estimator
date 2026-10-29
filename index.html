@@ -1355,12 +1355,20 @@
             );
             allocations[index] += 1;
           }
-          const platforms = groups
-              .map((group) => {
-                const xs = group.points.map((point) => sx(point[0]));
-                const y = sy(group.y);
-                return `<line x1="${Math.max(18, Math.min(...xs) - 55)}" y1="${y}" x2="${Math.min(982, Math.max(...xs) + 55)}" y2="${y}" class="coverage-platform"/>`;
-              })
+          const platformSegments = map.name === "Damp Forest"
+              ? [
+                  [675, 1254, 648],
+                  [676, 1321, 1908],
+                  [125, 853, 2388],
+                  [961, 1598, 2388],
+                ]
+              : groups.map((group) => [
+                  Math.min(...group.points.map((point) => point[0])) - 55,
+                  Math.max(...group.points.map((point) => point[0])) + 55,
+                  group.y,
+                ]),
+            platforms = platformSegments
+              .map(([x1, x2, y]) => `<line x1="${sx(x1)}" y1="${sy(y)}" x2="${sx(x2)}" y2="${sy(y)}" class="coverage-platform"/>`)
               .join(""),
             labels = [],
             regions = [];
