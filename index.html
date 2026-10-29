@@ -1348,12 +1348,26 @@
           const colors = ["#38bdf8", "#a78bfa", "#f59e0b", "#34d399", "#fb7185", "#facc15"],
             areas = Math.min(Math.max(1, party), points.length),
             balancedPoints = [...points].sort((a, b) => a[1] - b[1] || a[0] - b[0]),
-            coverageGroups = Array.from({ length: areas }, (_, area) =>
+            balancedGroups = Array.from({ length: areas }, (_, area) =>
               balancedPoints.slice(
                 Math.floor(area * balancedPoints.length / areas),
                 Math.floor((area + 1) * balancedPoints.length / areas),
               ),
             ),
+            dampGroups =
+              map.name === "Damp Forest" && areas === 4 && groups.length >= 3
+                ? (() => {
+                    const sortedGroups = [...groups].sort((a, b) => a.y - b.y),
+                      bottom = [...sortedGroups.pop().points].sort((a, b) => a[0] - b[0]),
+                      split = Math.ceil(bottom.length / 2);
+                    return [
+                      ...sortedGroups.map((group) => group.points),
+                      bottom.slice(0, split),
+                      bottom.slice(split),
+                    ];
+                  })()
+                : balancedGroups,
+            coverageGroups = dampGroups,
             labels = [],
             regions = [];
           coverageGroups.forEach((covered) => {
