@@ -839,6 +839,7 @@
       </div>
     </main>
     <script src="maps-data.js"></script>
+    <script src="map-geometry.js"></script>
     <script src="patk-data.js"></script>
     <script src="monster-level-data.js"></script>
     <script>
@@ -1328,12 +1329,17 @@
           const target = q("#coverageDiagram");
           if (!target || !map?.positions?.length) return;
           const points = map.positions,
-            minX = Math.min(...points.map((p) => p[0])),
-            maxX = Math.max(...points.map((p) => p[0])),
-            minY = Math.min(...points.map((p) => p[1])),
-            maxY = Math.max(...points.map((p) => p[1])),
+            geometry = OSMS_MAP_GEOMETRY[String(map.id)],
+            geometryPoints = [...(geometry?.platforms || []).flatMap(([x1, x2, y]) => [[x1, y], [x2, y]]), ...(geometry?.ropes || []).flatMap(([x, y1, y2]) => [[x, y1], [x, y2]])],
+            allPoints = points.concat(geometryPoints),
+            minX = Math.min(...allPoints.map((p) => p[0])),
+            maxX = Math.max(...allPoints.map((p) => p[0])),
+            minY = Math.min(...allPoints.map((p) => p[1])),
+            maxY = Math.max(...allPoints.map((p) => p[1])),
             sx = (x) => 40 + ((x - minX) / Math.max(1, maxX - minX)) * 920,
             sy = (y) => 35 + ((y - minY) / Math.max(1, maxY - minY)) * 390,
+            platformLines = (geometry?.platforms || []).map(([x1, x2, y]) => `<line x1="${sx(x1)}" y1="${sy(y)}" x2="${sx(x2)}" y2="${sy(y)}" stroke="#94a3b8" stroke-width="12" stroke-linecap="round"/><line x1="${sx(x1)}" y1="${sy(y)-5}" x2="${sx(x2)}" y2="${sy(y)-5}" stroke="#e2e8f0" stroke-width="2"/>`).join(""),
+            ropeLines = (geometry?.ropes || []).map(([x, y1, y2]) => `<line x1="${sx(x)}" y1="${sy(y1)}" x2="${sx(x)}" y2="${sy(y2)}" stroke="#c7f36b" stroke-width="5" stroke-dasharray="7 5" opacity=".9"/>`).join(""),
             levels = [];
           [...points].sort((a, b) => a[1] - b[1]).forEach((point) => {
             const level = levels.find((candidate) => Math.abs(candidate.y - point[1]) <= 24);
@@ -1360,7 +1366,7 @@
               });
             }).join(""),
             dots = points.map((point) => `<circle cx="${sx(point[0])}" cy="${sy(point[1])}" r="7" fill="#f8fafc" stroke="#0f172a" stroke-width="3"/>`).join("");
-          target.innerHTML = `<svg viewBox="0 0 1000 500" role="img" aria-label="Inferred platform layout and spawn positions for ${escapeHtml(map.name)}">${platforms}${dots}</svg>`;
+          target.innerHTML = `<svg viewBox="0 0 1000 500" role="img" aria-label="Parsed platform and rope layout with spawn positions for ${escapeHtml(map.name)}">${platformLines}${ropeLines}${platforms}${dots}</svg>`;
         }
         function render() {
           model = mapById[selected];
