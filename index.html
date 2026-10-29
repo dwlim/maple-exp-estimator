@@ -1324,59 +1324,20 @@
         function osmsMapUrl(map) {
           return `https://osmsdataexplorer.com/#maps?q=${encodeURIComponent(`id:${String(map.id).padStart(9, "0")}`)}`;
         }
-        function renderCoverageDiagram(map, party) {
+        function renderCoverageDiagram(map) {
           const target = q("#coverageDiagram");
           if (!target || !map?.positions?.length) return;
           const points = map.positions,
-            hasRealMinimap = false,
+            geometry = OSMS_MAP_GEOMETRY[String(map.id)],
+            renderUrl = geometry?.renderUrl,
             minX = Math.min(...points.map((p) => p[0])),
             maxX = Math.max(...points.map((p) => p[0])),
             minY = Math.min(...points.map((p) => p[1])),
             maxY = Math.max(...points.map((p) => p[1])),
-            sx = hasRealMinimap
-              ? (x) => (x / 1600) * 92
-              : (x) => 40 + ((x - minX) / Math.max(1, maxX - minX)) * 920,
-            sy = hasRealMinimap
-              ? (y) => (y / 2400) * 158
-              : (y) => 35 + ((y - minY) / Math.max(1, maxY - minY)) * 390,
-            groups = [];
-          [...points].sort((a, b) => a[1] - b[1]).forEach((point) => {
-            const group = groups.find((candidate) => Math.abs(candidate.y - point[1]) <= 180);
-            if (group) group.points.push(point);
-            else groups.push({ y: point[1], points: [point] });
-          });
-          const colors = ["#38bdf8", "#a78bfa", "#f59e0b", "#34d399", "#fb7185", "#facc15"],
-            areas = Math.min(Math.max(1, party), points.length),
-            viewWidth = hasRealMinimap ? 92 : 1000,
-            viewHeight = hasRealMinimap ? 158 : 500,
-            partition = (items, left, right, top, bottom, count) => {
-              if (count === 1) return [{ points: items, left, right, top, bottom }];
-              const xSpread = Math.max(...items.map((p) => sx(p[0]))) - Math.min(...items.map((p) => sx(p[0]))),
-                ySpread = Math.max(...items.map((p) => sy(p[1]))) - Math.min(...items.map((p) => sy(p[1]))),
-                splitX = xSpread >= ySpread,
-                sorted = [...items].sort((a, b) => splitX ? a[0] - b[0] : a[1] - b[1]),
-                leftCount = Math.floor(count / 2),
-                itemCount = Math.max(1, Math.floor(sorted.length * leftCount / count)),
-                split = sorted[itemCount - 1],
-                next = sorted[itemCount];
-              if (!next) return [{ points: items, left, right, top, bottom }];
-              const splitAt = splitX ? (sx(split[0]) + sx(next[0])) / 2 : (sy(split[1]) + sy(next[1])) / 2;
-              return [
-                ...partition(sorted.slice(0, itemCount), left, splitX ? splitAt : right, top, splitX ? bottom : splitAt, leftCount),
-                ...partition(sorted.slice(itemCount), splitX ? splitAt : left, right, splitX ? top : splitAt, bottom, count - leftCount),
-              ];
-            },
-            coverageGroups = partition(points, 1, viewWidth - 1, 1, viewHeight - 1, areas),
-            labels = [],
-            regions = [];
-          coverageGroups.forEach((group) => {
-            const color = colors[regions.length % colors.length], name = `Player ${regions.length + 1}`,
-              left = group.left, right = group.right, top = group.top, bottom = group.bottom;
-            regions.push(`<rect x="${left}" y="${top}" width="${Math.max(52, right - left)}" height="${Math.max(48, bottom - top)}" rx="12" fill="${color}" fill-opacity=".18" stroke="${color}" stroke-width="3"/>`);
-            labels.push(`<text x="${(left + right) / 2}" y="${Math.max(hasRealMinimap ? 4 : 22, top + 16)}" text-anchor="middle" fill="${color}">${name}</text>`);
-          });
-          const dots = points.map((point) => `<circle cx="${sx(point[0])}" cy="${sy(point[1])}" r="5" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>`).join("");
-          target.innerHTML = `<svg viewBox="0 0 1000 500" role="img" aria-label="Spawn positions and approximate party coverage for ${escapeHtml(map.name)}">${regions.join("")}${dots}${labels.join("")}</svg>`;
+            sx = (x) => 40 + ((x - minX) / Math.max(1, maxX - minX)) * 920,
+            sy = (y) => 35 + ((y - minY) / Math.max(1, maxY - minY)) * 390,
+            dots = points.map((point) => `<circle cx="${sx(point[0])}" cy="${sy(point[1])}" r="7" fill="#f8fafc" stroke="#0f172a" stroke-width="3"/>`).join("");
+          target.innerHTML = `<svg viewBox="0 0 1000 500" role="img" aria-label="OSMS map layout and spawn positions for ${escapeHtml(map.name)}">${renderUrl ? `<image href="${renderUrl}" x="0" y="0" width="1000" height="500" preserveAspectRatio="none" opacity=".9"/>` : ""}${dots}</svg>`;
         }
         function render() {
           model = mapById[selected];
