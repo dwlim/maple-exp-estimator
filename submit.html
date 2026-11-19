@@ -47,12 +47,12 @@
       <div class="grid">
         <div class="field wide"><label for="map-search">Map</label><div class="map-search-wrap"><input id="map-search" autocomplete="off" placeholder="Type to search maps…" required><input id="map" name="entry.1144308704" type="hidden"><div class="map-results" id="map-results" hidden></div></div><div class="hint" id="map-hint">Start typing a map name, then choose a matching result.</div></div>
         <div class="field"><label for="level">Level <span>(10–100)</span></label><input id="level" name="entry.402953427" type="number" min="10" max="100" step="1" required></div>
-        <div class="field"><label for="party">Party size <span>(1–6)</span></label><input id="party" name="entry.2093162643" type="number" min="1" max="6" step="1" required></div>
+        <div class="field"><label for="party">Party size <span>(1–6)</span></label><input id="party" name="entry.2093162643" type="number" min="1" max="6" step="1"></div>
         <div class="field"><label for="xp">XP/hour</label><input id="xp" name="entry.260328088" placeholder="150k or 150,000" pattern="[0-9,.]+\\s*[kKmM]?" required><div class="hint">Examples: 100k, 1.5m, 150,000</div></div>
-        <div class="field"><label for="meso">Meso/hour <span>(raw + ETC)</span></label><input id="meso" name="entry.512620393" placeholder="100k or 100,000" pattern="[0-9,.]+\\s*[kKmM]?" required></div>
-        <div class="field"><label for="damage">Damage range <span>(stat window)</span></label><input id="damage" name="entry.526656242" placeholder="500-1000" pattern="\\s*[1-9][0-9]*\\s*-\\s*[1-9][0-9]*\\s*" required></div>
-        <div class="field"><label for="difficulty">Difficulty to find map</label><select id="difficulty" name="entry.1230573176" required><option value="1">1 — Very easy</option><option value="2">2</option><option value="3">3 — Average</option><option value="4">4</option><option value="5">5 — Very hard</option></select></div>
-        <div class="field"><label for="skill">Main attacking skill</label><select id="skill" name="entry.470555109" required><option>Power Strike</option><option>Rush + Slash Blast</option><option>Basic Attack</option></select></div>
+        <div class="field"><label for="meso">Meso/hour <span>(raw + ETC)</span></label><input id="meso" name="entry.512620393" placeholder="100k or 100,000" pattern="[0-9,.]+\\s*[kKmM]?"></div>
+        <div class="field"><label for="damage">Damage range <span>(stat window)</span></label><input id="damage" name="entry.526656242" placeholder="500-1000" pattern="\\s*[1-9][0-9]*\\s*-\\s*[1-9][0-9]*\\s*"></div>
+        <div class="field"><label for="difficulty">Difficulty to find map</label><select id="difficulty" name="entry.1230573176"><option value="1">1 — Very easy</option><option value="2">2</option><option value="3">3 — Average</option><option value="4">4</option><option value="5">5 — Very hard</option></select></div>
+        <div class="field"><label for="skill">Main attacking skill</label><select id="skill" name="entry.470555109"><option>Power Strike</option><option>Rush + Slash Blast</option><option>Basic Attack</option></select></div>
         <div class="field wide"><label for="notes">Additional notes <span>(platform, rotation, or anything unusual)</span></label><textarea id="notes" name="entry.1270960116" placeholder="Example: top platform split between two players; rate measured over 30 minutes."></textarea></div>
       </div>
       <button type="submit" id="submit">Submit map data</button>
