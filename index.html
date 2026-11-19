@@ -56,6 +56,21 @@
     .difficulty { display:inline-grid; place-items:center; width:24px; height:24px; border-radius:7px; background:#2a3023; color:var(--lime); font:12px 'DM Mono',monospace; }
     .difficulty.blank { color:var(--muted); background:#272932; }
     .notes { max-width:300px; min-width:180px; color:#c9c9cf; font-size:12px; line-height:1.5; }
+    .map-row { cursor:pointer; }
+    .map-row[aria-expanded="true"] { background:#20242c; }
+    .map-toggle { display:flex; align-items:flex-start; gap:8px; width:100%; padding:0; border:0; background:transparent; color:inherit; text-align:left; font:inherit; cursor:pointer; }
+    .map-toggle:focus-visible { outline:2px solid var(--lime); outline-offset:4px; border-radius:4px; }
+    .chevron { flex:0 0 auto; color:var(--lime); font-size:18px; line-height:1; transition:transform .16s ease; }
+    .map-row[aria-expanded="true"] .chevron { transform:rotate(90deg); }
+    .report-count, .range-note { display:block; margin-top:5px; color:var(--muted); font:10px 'DM Mono',monospace; }
+    .detail-row[hidden] { display:none; }
+    .detail-row td { padding:0 9px 16px; background:#15171c; }
+    .observation-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; padding:12px; border:1px solid var(--line); border-radius:12px; background:#191b21; }
+    .observation-card { min-width:0; padding:13px; border:1px solid #343741; border-radius:10px; background:#20222a; }
+    .observation-card h3 { margin:0 0 11px; color:var(--text); font-size:12px; }
+    .observation-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+    .detail-label { display:block; margin-bottom:4px; color:var(--muted); font:9px 'DM Mono',monospace; text-transform:uppercase; }
+    .observation-card .notes { max-width:none; min-width:0; margin-top:12px; }
     .empty, .loading, .error { padding:44px 20px; text-align:center; color:var(--muted); }
     .error { color:var(--danger); }
     footer { display:flex; justify-content:space-between; gap:20px; margin-top:20px; color:var(--muted); font-size:11px; line-height:1.5; }
@@ -112,7 +127,7 @@
   </main>
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQL93ZrJlx_0Tm9YefoduCVOdooARaixqTkkTFQ2OxGQEmuqIiWiLjVpEo-9MBavTWU7sb13Pm6cTm7/pub?output=csv';
-    const state = { rows: [], sort: { key: 'xp', direction: 'desc' } };
+    const state = { rows: [], sort: { key: 'xp', direction: 'desc' }, expanded: new Set() };
     const $ = id => document.getElementById(id);
     const fields = ['Map', 'Level', 'XP/Hour', 'Meso/Hour', 'Difficulty to get spot', 'Party Size', 'Damage Range', 'Additional Notes'];
     function csvParse(text) {
@@ -136,15 +151,25 @@
       const query = $('search').value.trim().toLowerCase(), difficulty = $('difficulty').value, party = $('party').value;
       return state.rows.filter(row => (!query || Object.values(row).some(value => String(value).toLowerCase().includes(query))) && (difficulty === 'all' || (difficulty === 'blank' ? row.difficulty == null : row.difficulty === Number(difficulty))) && (party === 'all' || (party === 'blank' ? row.party == null : row.party === Number(party))));
     }
-    function sorted(rows) { const {key,direction} = state.sort; return [...rows].sort((a,b) => { const av = a[key], bv = b[key]; if (av == null && bv == null) return a.mapName.localeCompare(b.mapName); if (av == null) return 1; if (bv == null) return -1; const result = typeof av === 'string' ? av.localeCompare(bv) : av - bv; return result * (direction === 'asc' ? 1 : -1); }); }
+    const range = (values, formatter = value => value) => { const present = values.filter(value => value != null); if (!present.length) return '—'; const min = Math.min(...present), max = Math.max(...present); return min === max ? formatter(min) : `${formatter(min)}–${formatter(max)}`; };
+    function groups(rows) {
+      const grouped = new Map();
+      rows.forEach(row => { const key = row.Map || row.mapName; if (!grouped.has(key)) grouped.set(key, { key, mapName:row.mapName, region:row.region, rows:[] }); grouped.get(key).rows.push(row); });
+      return [...grouped.values()].map(group => ({ ...group, level:Math.max(...group.rows.map(row => row.level ?? -Infinity)), xp:Math.max(...group.rows.map(row => row.xp ?? -Infinity)), meso:Math.max(...group.rows.map(row => row.meso ?? -Infinity)), difficulty:Math.min(...group.rows.map(row => row.difficulty ?? Infinity)), party:Math.max(...group.rows.map(row => row.party ?? -Infinity)), reportCount:group.rows.length }));
+    }
+    function sorted(groupsToSort) { const {key,direction} = state.sort; return [...groupsToSort].sort((a,b) => { const av = a[key], bv = b[key]; if (!Number.isFinite(av) && !Number.isFinite(bv)) return a.mapName.localeCompare(b.mapName); if (!Number.isFinite(av)) return 1; if (!Number.isFinite(bv)) return -1; const result = typeof av === 'string' ? av.localeCompare(bv) : av - bv; return result * (direction === 'asc' ? 1 : -1); }); }
+    function observationCard(row) { return `<article class="observation-card"><h3>Level ${row.level ?? '—'} · ${row.party == null ? 'Party not reported' : `${row.party} player${row.party === 1 ? '' : 's'}`}</h3><div class="observation-meta"><div><span class="detail-label">XP / hour</span><span class="mono xp">${format(row.xp)}</span></div><div><span class="detail-label">Meso / hour</span><span class="mono meso">${format(row.meso)}</span></div><div><span class="detail-label">Spot difficulty</span><span class="difficulty ${row.difficulty == null ? 'blank' : ''}">${row.difficulty ?? '—'}</span></div><div><span class="detail-label">Damage range</span><span class="mono">${esc(row['Damage Range']) || '—'}</span></div></div><div class="notes"><span class="detail-label">Notes</span>${esc(row['Additional Notes']) || '—'}</div></article>`; }
+    function toggleGroup(key) { state.expanded.has(key) ? state.expanded.delete(key) : state.expanded.add(key); render(); }
     function render() {
-      const rows = sorted(filtered()); $('result-count').textContent = `${rows.length} of ${state.rows.length} observations`;
+      const rows = filtered(), mapGroups = sorted(groups(rows)); $('result-count').textContent = `${rows.length} observation${rows.length === 1 ? '' : 's'} · ${mapGroups.length} map${mapGroups.length === 1 ? '' : 's'}`;
       if (!rows.length) { $('table-container').innerHTML = '<div class="empty">No reports match these filters.</div>'; return; }
-      const headers = [['mapName','Map'],['level','Level'],['xp','XP / hour'],['meso','Meso / hour'],['difficulty','Spot'],['party','Party'],['damage','Damage'],['notes','Notes']];
-      const head = headers.map(([key,label]) => `<th><button data-sort="${key}">${label}${state.sort.key === key ? (state.sort.direction === 'asc' ? ' ↑' : ' ↓') : ''}</button></th>`).join('');
-      const body = rows.map(row => `<tr><td><span class="map-name">${esc(row.mapName)}</span><span class="region">${esc(row.region)}</span></td><td class="mono">${row.level ?? '—'}</td><td class="mono xp">${format(row.xp)}</td><td class="mono meso">${format(row.meso)}</td><td><span class="difficulty ${row.difficulty == null ? 'blank' : ''}">${row.difficulty ?? '—'}</span></td><td class="mono">${row.party ?? '—'}</td><td class="mono">${esc(row['Damage Range']) || '—'}</td><td class="notes">${esc(row['Additional Notes']) || '—'}</td></tr>`).join('');
+      const headers = [['mapName','Map'],['level','Levels'],['xp','Best XP / hour'],['meso','Best Meso / hour'],['difficulty','Spot'],['party','Party'],['reportCount','Reports'],['notes','Details']];
+      const head = headers.map(([key,label]) => key === 'notes' ? `<th>${label}</th>` : `<th><button data-sort="${key}">${label}${state.sort.key === key ? (state.sort.direction === 'asc' ? ' ↑' : ' ↓') : ''}</button></th>`).join('');
+      const body = mapGroups.map(group => { const open = state.expanded.has(group.key), orderedRows = [...group.rows].sort((a,b) => (b.xp ?? -Infinity) - (a.xp ?? -Infinity)); return `<tr class="map-row" data-map-row="${esc(group.key)}" tabindex="0" aria-expanded="${open}"><td><button class="map-toggle" data-map-toggle="${esc(group.key)}" aria-label="${open ? 'Collapse' : 'Expand'} ${esc(group.mapName)}"><span class="chevron">›</span><span><span class="map-name">${esc(group.mapName)}</span><span class="region">${esc(group.region)}</span><span class="report-count">${group.reportCount} report${group.reportCount === 1 ? '' : 's'}</span></span></button></td><td class="mono">${range(group.rows.map(row => row.level))}</td><td class="mono xp">${format(group.xp)}<span class="range-note">${group.rows.length > 1 ? range(group.rows.map(row => row.xp), format) : 'best'}</span></td><td class="mono meso">${format(group.meso)}<span class="range-note">${group.rows.length > 1 ? range(group.rows.map(row => row.meso), format) : 'best'}</span></td><td><span class="difficulty ${Number.isFinite(group.difficulty) ? '' : 'blank'}">${Number.isFinite(group.difficulty) ? group.difficulty : '—'}</span></td><td class="mono">${range(group.rows.map(row => row.party))}</td><td class="mono">${group.reportCount}</td><td class="notes">Expand for damage ranges and submitted notes.</td></tr><tr class="detail-row" data-map-detail="${esc(group.key)}" ${open ? '' : 'hidden'}><td colspan="8"><div class="observation-list">${orderedRows.map(observationCard).join('')}</div></td></tr>`; }).join('');
       $('table-container').innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
       document.querySelectorAll('[data-sort]').forEach(button => button.addEventListener('click', () => { const key=button.dataset.sort; state.sort = { key, direction: state.sort.key === key && state.sort.direction === 'desc' ? 'asc' : 'desc' }; render(); }));
+      document.querySelectorAll('[data-map-toggle]').forEach(button => button.addEventListener('click', event => { event.stopPropagation(); toggleGroup(button.dataset.mapToggle); }));
+      document.querySelectorAll('[data-map-row]').forEach(row => { row.addEventListener('click', event => { if (!event.target.closest('button')) toggleGroup(row.dataset.mapRow); }); row.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleGroup(row.dataset.mapRow); } }); });
     }
     function updateStats() { const levels=state.rows.map(r=>r.level).filter(v=>v != null); $('observation-count').textContent=state.rows.length; $('map-count').textContent=new Set(state.rows.map(r=>r.Map)).size; $('level-range').textContent=levels.length ? `${Math.min(...levels)}–${Math.max(...levels)}` : '—'; }
     async function load() { $('status').textContent='Updating…'; $('table-container').innerHTML='<div class="loading">Loading the latest community reports…</div>'; try { const response=await fetch(`${CSV_URL}&t=${Date.now()}`); if (!response.ok) throw new Error(`HTTP ${response.status}`); state.rows=csvParse(await response.text()).filter(row => row.Map).map(normalized); updateStats(); render(); $('status').textContent='Live source'; $('updated').textContent=`Source updated ${new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`; } catch (error) { $('status').textContent='Could not load source'; $('table-container').innerHTML=`<div class="error">The published sheet could not be loaded right now.<br><small>${esc(error.message)}</small></div>`; } }
