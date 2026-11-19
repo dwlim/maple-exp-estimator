@@ -36,15 +36,17 @@
     .status { display:none; margin-top:17px; padding:12px; border-radius:8px; background:#2b3421; color:var(--lime); font-size:13px; line-height:1.5; }
     .status.show { display:block; }
     .back { display:inline-block; margin-bottom:26px; color:var(--muted); font:11px "DM Mono",monospace; text-decoration:none; }
+    .direct-form { float:right; color:var(--lime); font:11px "DM Mono",monospace; }
     @media (max-width:620px) { main { padding:28px 15px 48px; } .panel { padding:18px; } .grid { grid-template-columns:1fr; } .wide { grid-column:auto; } }
   </style>
 </head>
 <body>
   <main>
     <a class="back" href="index.html">← Back to estimator</a>
+    <a class="direct-form" href="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/viewform" target="_blank" rel="noopener">Open original form ↗</a>
     <div class="eyebrow">Community data</div>
     <h1>Submit map data.</h1>
-    <p class="intro">Share your measured training results with the community. Use an average rate from a representative session rather than a short burst. Submissions are reviewed before appearing in the published list.</p>
+    <p class="intro">Share your training results. Use an average rate from a representative session; submissions are reviewed before publishing.</p>
     <form class="panel" id="submission" action="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/formResponse" method="post" target="submission-frame">
       <p class="required-note"><span class="required-mark">*</span> Required</p>
       <div class="grid">
