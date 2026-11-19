@@ -32,11 +32,14 @@
     .panel { background:#17191fd9; border:1px solid var(--line); border-radius:18px; box-shadow:0 18px 55px #0003; overflow:hidden; }
     .toolbar { display:flex; align-items:center; gap:12px; padding:18px; border-bottom:1px solid var(--line); }
     .search { position:relative; flex:1; }
-    .search input, select { width:100%; border:1px solid #444751; background:#101114; color:var(--text); border-radius:9px; padding:12px 13px; font:12px 'DM Mono',monospace; }
+    .search input, .level-filter input { width:100%; border:1px solid #444751; background:#101114; color:var(--text); border-radius:9px; padding:12px 13px; font:12px 'DM Mono',monospace; }
     .search input { padding-left:38px; }
     .search:before { content:'⌕'; position:absolute; left:14px; top:8px; color:var(--muted); font-size:20px; z-index:1; }
-    select { width:auto; min-width:155px; cursor:pointer; }
-    input:focus, select:focus { outline:2px solid #c9f36d44; border-color:var(--lime); }
+    .level-filter { display:flex; align-items:center; gap:7px; color:var(--muted); font:10px 'DM Mono',monospace; white-space:nowrap; }
+    .level-filter label { display:flex; align-items:center; gap:6px; }
+    .level-filter input { width:62px; padding:12px 9px; }
+    .level-filter .tolerance { width:52px; }
+    input:focus { outline:2px solid #c9f36d44; border-color:var(--lime); }
     .refresh { border:1px solid #444751; background:var(--panel2); color:var(--text); border-radius:9px; padding:12px 14px; font:600 11px Manrope; cursor:pointer; }
     .refresh:hover { border-color:var(--lime); color:var(--lime); }
     .result-line { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 18px 0; color:var(--muted); font:11px 'DM Mono',monospace; }
@@ -86,8 +89,8 @@
       .stat-label { font-size:10px; }
       .toolbar { flex-wrap:wrap; padding:13px; }
       .search { flex:1 0 100%; }
-      select { flex:1 1 0; min-width:0; }
-      select, .refresh { min-height:42px; }
+      .level-filter { flex:1 1 auto; justify-content:center; }
+      .level-filter input, .refresh { min-height:42px; }
       .refresh { flex:0 0 auto; }
       .result-line { padding-left:13px; padding-right:13px; }
       .table-wrap { padding-left:7px; padding-right:7px; }
@@ -116,8 +119,11 @@
     <section class="panel" aria-label="Training observations">
       <div class="toolbar">
         <label class="search"><span class="sr-only">Search observations</span><input id="search" type="search" placeholder="Search maps, notes, or damage…" autocomplete="off"></label>
-        <select id="difficulty" aria-label="Filter by spot difficulty"><option value="all">All spot difficulty</option><option value="1">Easy to claim · 1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">Hard to claim · 5</option><option value="blank">Not reported</option></select>
-        <select id="party" aria-label="Filter by party size"><option value="all">All party sizes</option><option value="1">Solo</option><option value="2">2 players</option><option value="3">3 players</option><option value="4">4 players</option><option value="5">5 players</option><option value="6">6 players</option><option value="blank">Not reported</option></select>
+        <div class="level-filter" aria-label="Filter by reported level range">
+          <label>Level <input id="level" type="number" min="1" max="200" value="45" aria-label="Center level"></label>
+          <span aria-hidden="true">±</span>
+          <label><span class="sr-only">Level tolerance</span><input id="tolerance" class="tolerance" type="number" min="0" max="200" value="3" aria-label="Level plus or minus"></label>
+        </div>
         <button class="refresh" id="refresh" type="button">Refresh</button>
       </div>
       <div class="result-line"><span id="result-count">Loading observations…</span><span class="status" id="status"></span></div>
@@ -148,8 +154,9 @@
     const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
     function normalized(row) { return { ...row, level:number(row.Level), xp:number(row['XP/Hour']), meso:number(row['Meso/Hour']), difficulty:number(row['Difficulty to get spot']), party:number(row['Party Size']), mapName:(row.Map || 'Unnamed map').replace(/\s+—\s+.*/, ''), region:(row.Map || '').match(/—\s*(.*)$/)?.[1] || '' }; }
     function filtered() {
-      const query = $('search').value.trim().toLowerCase(), difficulty = $('difficulty').value, party = $('party').value;
-      return state.rows.filter(row => (!query || Object.values(row).some(value => String(value).toLowerCase().includes(query))) && (difficulty === 'all' || (difficulty === 'blank' ? row.difficulty == null : row.difficulty === Number(difficulty))) && (party === 'all' || (party === 'blank' ? row.party == null : row.party === Number(party))));
+      const query = $('search').value.trim().toLowerCase(), level = number($('level').value), tolerance = number($('tolerance').value);
+      const levelMatch = row => level == null || tolerance == null || tolerance < 0 || (row.level != null && row.level >= level - tolerance && row.level <= level + tolerance);
+      return state.rows.filter(row => (!query || Object.values(row).some(value => String(value).toLowerCase().includes(query))) && levelMatch(row));
     }
     const range = (values, formatter = value => value) => { const present = values.filter(value => value != null); if (!present.length) return '—'; const min = Math.min(...present), max = Math.max(...present); return min === max ? formatter(min) : `${formatter(min)}–${formatter(max)}`; };
     function groups(rows) {
@@ -173,7 +180,7 @@
     }
     function updateStats() { const levels=state.rows.map(r=>r.level).filter(v=>v != null); $('observation-count').textContent=state.rows.length; $('map-count').textContent=new Set(state.rows.map(r=>r.Map)).size; $('level-range').textContent=levels.length ? `${Math.min(...levels)}–${Math.max(...levels)}` : '—'; }
     async function load() { $('status').textContent='Updating…'; $('table-container').innerHTML='<div class="loading">Loading the latest community reports…</div>'; try { const response=await fetch(`${CSV_URL}&t=${Date.now()}`); if (!response.ok) throw new Error(`HTTP ${response.status}`); state.rows=csvParse(await response.text()).filter(row => row.Map).map(normalized); updateStats(); render(); $('status').textContent='Live source'; $('updated').textContent=`Source updated ${new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`; } catch (error) { $('status').textContent='Could not load source'; $('table-container').innerHTML=`<div class="error">The published sheet could not be loaded right now.<br><small>${esc(error.message)}</small></div>`; } }
-    ['search','difficulty','party'].forEach(id => $(id).addEventListener('input', render)); $('refresh').addEventListener('click', load); load();
+    ['search','level','tolerance'].forEach(id => $(id).addEventListener('input', render)); $('refresh').addEventListener('click', load); load();
   </script>
 </body>
 </html>
