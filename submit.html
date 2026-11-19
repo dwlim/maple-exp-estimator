@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Submit Map Data · MapleStory Classic</title>
+  <style>
+    :root { --bg:#111216; --panel:#191a20; --line:#303139; --muted:#999aa5; --text:#f3f2f7; --lime:#c7f36b; --purple:#a995ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--text); background:radial-gradient(circle at 80% 0,#252333 0,#111216 38%); font:15px Manrope,system-ui,sans-serif; }
+    main { max-width:760px; margin:auto; padding:42px 22px 64px; }
+    a { color:var(--lime); }
+    .eyebrow { color:var(--lime); font:11px "DM Mono",monospace; letter-spacing:1.4px; text-transform:uppercase; }
+    h1 { margin:10px 0 12px; font-size:clamp(34px,7vw,58px); line-height:1; letter-spacing:-2px; }
+    .intro { color:var(--muted); line-height:1.6; max-width:620px; margin:0 0 28px; }
+    .panel { background:#191a20e8; border:1px solid var(--line); border-radius:16px; padding:24px; box-shadow:0 18px 50px #0002; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:17px; }
+    .field { display:flex; flex-direction:column; gap:7px; }
+    .wide { grid-column:1/-1; }
+    label { color:#dedee5; font-size:12px; font-weight:700; }
+    label span { color:var(--muted); font-weight:400; }
+    input,select,textarea { width:100%; border:1px solid #41424b; border-radius:7px; padding:11px 10px; color:var(--text); background:#111216; font:13px "DM Mono",monospace; }
+    textarea { min-height:94px; resize:vertical; font-family:inherit; }
+    input:focus,select:focus,textarea:focus { outline:none; border-color:var(--lime); box-shadow:0 0 0 2px #c7f36b22; }
+    .hint { color:var(--muted); font-size:11px; line-height:1.4; }
+    button { margin-top:22px; border:1px solid var(--lime); border-radius:8px; padding:12px 18px; color:#151711; background:var(--lime); font:700 13px Manrope,sans-serif; cursor:pointer; }
+    button:hover { filter:brightness(1.08); }
+    button:disabled { opacity:.55; cursor:wait; }
+    .status { display:none; margin-top:17px; padding:12px; border-radius:8px; background:#2b3421; color:var(--lime); font-size:13px; line-height:1.5; }
+    .status.show { display:block; }
+    .back { display:inline-block; margin-bottom:26px; color:var(--muted); font:11px "DM Mono",monospace; text-decoration:none; }
+    @media (max-width:620px) { main { padding:28px 15px 48px; } .panel { padding:18px; } .grid { grid-template-columns:1fr; } .wide { grid-column:auto; } }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="index.html">← Back to estimator</a>
+    <div class="eyebrow">Community data</div>
+    <h1>Submit map data.</h1>
+    <p class="intro">Share your measured training results with the community. Use an average rate from a representative session rather than a short burst. Submissions are reviewed before appearing in the published list.</p>
+    <form class="panel" id="submission" action="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/formResponse" method="post" target="submission-frame">
+      <div class="grid">
+        <div class="field wide"><label for="map">Map</label><select id="map" name="entry.1144308704" required><option value="">Loading maps…</option></select></div>
+        <div class="field"><label for="level">Level <span>(10–100)</span></label><input id="level" name="entry.402953427" type="number" min="10" max="100" step="1" required></div>
+        <div class="field"><label for="party">Party size <span>(1–6)</span></label><input id="party" name="entry.2093162643" type="number" min="1" max="6" step="1" required></div>
+        <div class="field"><label for="xp">XP/hour</label><input id="xp" name="entry.260328088" placeholder="150k or 150,000" pattern="[0-9,.]+\\s*[kKmM]?" required><div class="hint">Examples: 100k, 1.5m, 150,000</div></div>
+        <div class="field"><label for="meso">Meso/hour <span>(raw + ETC)</span></label><input id="meso" name="entry.512620393" placeholder="100k or 100,000" pattern="[0-9,.]+\\s*[kKmM]?" required></div>
+        <div class="field"><label for="damage">Damage range <span>(stat window)</span></label><input id="damage" name="entry.526656242" placeholder="500-1000" pattern="\\s*[1-9][0-9]*\\s*-\\s*[1-9][0-9]*\\s*" required></div>
+        <div class="field"><label for="difficulty">Difficulty to find map</label><select id="difficulty" name="entry.1230573176" required><option value="1">1 — Very easy</option><option value="2">2</option><option value="3">3 — Average</option><option value="4">4</option><option value="5">5 — Very hard</option></select></div>
+        <div class="field"><label for="skill">Main attacking skill</label><select id="skill" name="entry.470555109" required><option>Power Strike</option><option>Rush + Slash Blast</option><option>Basic Attack</option></select></div>
+        <div class="field wide"><label for="notes">Additional notes <span>(platform, rotation, or anything unusual)</span></label><textarea id="notes" name="entry.1270960116" placeholder="Example: top platform split between two players; rate measured over 30 minutes."></textarea></div>
+      </div>
+      <button type="submit" id="submit">Submit map data</button>
+      <div class="status" id="status" role="status">Thanks — your submission was sent for review.</div>
+    </form>
+    <iframe name="submission-frame" id="submission-frame" title="Submission status" hidden></iframe>
+  </main>
+  <script src="maps-data.js"></script>
+  <script>
+    const mapSelect = document.querySelector('#map');
+    const maps = (typeof OSMS_MAPS === 'undefined' ? [] : OSMS_MAPS)
+      .filter((map, index, all) => all.findIndex(candidate => candidate.name === map.name && candidate.region === map.region) === index)
+      .sort((a, b) => `${a.name} — ${a.region}`.localeCompare(`${b.name} — ${b.region}`));
+    mapSelect.replaceChildren(new Option('Choose a map…', ''));
+    maps.forEach(map => mapSelect.add(new Option(`${map.name} — ${map.region}`, `${map.name} — ${map.region}`)));
+    const form = document.querySelector('#submission');
+    const button = document.querySelector('#submit');
+    const status = document.querySelector('#status');
+    form.addEventListener('submit', () => { button.disabled = true; button.textContent = 'Submitting…'; });
+    document.querySelector('#submission-frame').addEventListener('load', () => {
+      if (!button.disabled) return;
+      status.classList.add('show');
+      button.disabled = false;
+      button.textContent = 'Submit another entry';
+      form.reset();
+    });
+  </script>
+</body>
+</html>
