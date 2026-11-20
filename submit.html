@@ -110,7 +110,14 @@
     const form = document.querySelector('#submission');
     const button = document.querySelector('#submit');
     const status = document.querySelector('#status');
-    form.addEventListener('submit', () => { button.disabled = true; button.textContent = 'Submitting…'; });
+    form.addEventListener('submit', () => {
+      ['#xp', '#meso'].forEach(selector => {
+        const input = document.querySelector(selector);
+        input.value = input.value.replace(/,/g, '');
+      });
+      button.disabled = true;
+      button.textContent = 'Submitting…';
+    });
     document.querySelector('#submission-frame').addEventListener('load', () => {
       if (!button.disabled) return;
       status.classList.add('show');
