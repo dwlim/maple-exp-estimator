@@ -47,6 +47,9 @@
     <h1>Submit map data.</h1>
     <p class="intro">Share your training results. Use an average rate from a representative session; submissions are reviewed before publishing.</p>
     <form class="panel" id="submission" action="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/formResponse" method="post" target="submission-frame">
+      <input type="hidden" name="fvv" value="1">
+      <input type="hidden" name="pageHistory" value="0">
+      <input type="hidden" name="submissionTimestamp" value="-1">
       <p class="required-note"><span class="required-mark">*</span> Required</p>
       <div class="grid">
         <div class="field wide"><label for="map-search">Map<span class="required-mark" aria-hidden="true">*</span></label><div class="map-search-wrap"><input id="map-search" autocomplete="off" placeholder="Type to search maps…" required><input id="map" name="entry.1144308704" type="hidden"><div class="map-results" id="map-results" hidden></div></div><div class="hint" id="map-hint">Start typing a map name, then choose a matching result.</div></div>
