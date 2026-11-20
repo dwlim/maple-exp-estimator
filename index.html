@@ -144,7 +144,7 @@
       if (cell || row.length) { row.push(cell.trim()); if (row.some(Boolean)) rows.push(row); }
       const headerIndex = rows.findIndex(row => row.some(cell => cell.replace(/^\ufeff/, '').trim() === 'Map') && row.some(cell => cell.trim() === 'XP/Hour'));
       if (headerIndex < 0) return [];
-      const headers = rows.splice(headerIndex, 1)[0].map((header, i) => header.replace(/^\ufeff/, '').trim() || `Column ${i + 1}`);
+      const headers = rows.splice(0, headerIndex + 1).at(-1).map((header, i) => header.replace(/^\ufeff/, '').trim() || `Column ${i + 1}`);
       return rows.map(values => Object.fromEntries(headers.map((header, i) => [header, values[i] || ''])));
     }
     const number = value => { const cleaned = String(value ?? '').replace(/[$,%\s,]/g, ''); if (!cleaned) return null; const n = Number(cleaned); return Number.isFinite(n) ? n : null; };
