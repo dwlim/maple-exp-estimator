@@ -141,7 +141,9 @@
         else cell += ch;
       }
       if (cell || row.length) { row.push(cell.trim()); if (row.some(Boolean)) rows.push(row); }
-      const headers = rows.shift() || [];
+      const headerIndex = rows.findIndex(row => row.includes('Map') && row.includes('XP/Hour'));
+      if (headerIndex < 0) return [];
+      const headers = rows.splice(headerIndex, 1)[0];
       return rows.map(values => Object.fromEntries(headers.map((header, i) => [header, values[i] || ''])));
     }
     const number = value => { const cleaned = String(value ?? '').replace(/[$,%\s,]/g, ''); if (!cleaned) return null; const n = Number(cleaned); return Number.isFinite(n) ? n : null; };
