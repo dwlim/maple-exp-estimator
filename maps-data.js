@@ -1,4 +1,4 @@
-const OSMS_MAPS = [
+window.OSMS_MAPS = [
   {
     id: 90040001,
     name: "Physical Fitness Test <Level 1>",
