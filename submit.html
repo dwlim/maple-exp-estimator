@@ -47,16 +47,13 @@
     <h1>Submit map data.</h1>
     <p class="intro">Share your training results. Use an average rate from a representative session; submissions are reviewed before publishing.</p>
     <form class="panel" id="submission" action="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/formResponse" method="post" target="submission-frame">
-      <input type="hidden" name="fvv" value="1">
-      <input type="hidden" name="pageHistory" value="0">
-      <input type="hidden" name="submissionTimestamp" value="-1">
       <p class="required-note"><span class="required-mark">*</span> Required</p>
       <div class="grid">
         <div class="field wide"><label for="map-search">Map<span class="required-mark" aria-hidden="true">*</span></label><div class="map-search-wrap"><input id="map-search" autocomplete="off" placeholder="Type to search maps…" required><input id="map" name="entry.1144308704" type="hidden"><div class="map-results" id="map-results" hidden></div></div><div class="hint" id="map-hint">Start typing a map name, then choose a matching result.</div></div>
         <div class="field"><label for="level">Level<span class="required-mark" aria-hidden="true">*</span> <span>(10–100)</span></label><input id="level" name="entry.402953427" type="number" min="10" max="100" step="1" required></div>
         <div class="field"><label for="party">Party size <span>(1–6)</span></label><input id="party" name="entry.2093162643" type="number" min="1" max="6" step="1"></div>
-        <div class="field"><label for="xp">XP/hour<span class="required-mark" aria-hidden="true">*</span></label><input id="xp" name="entry.260328088" placeholder="150k or 150,000" pattern="[0-9]+(?:,[0-9]{3})*(?:\.[0-9]+)?\s*[kKmM]?" required><div class="hint">Examples: 100k, 1.5m, 150,000</div></div>
-        <div class="field"><label for="meso">Meso/hour <span>(raw + ETC)</span></label><input id="meso" name="entry.512620393" placeholder="100k or 100,000" pattern="[0-9]+(?:,[0-9]{3})*(?:\.[0-9]+)?\s*[kKmM]?"></div>
+        <div class="field"><label for="xp">XP/hour<span class="required-mark" aria-hidden="true">*</span></label><input id="xp" name="entry.260328088" placeholder="150k or 150,000" pattern="[0-9,.]+\s*[kKmM]?" required><div class="hint">Examples: 100k, 1.5m, 150,000</div></div>
+        <div class="field"><label for="meso">Meso/hour <span>(raw + ETC)</span></label><input id="meso" name="entry.512620393" placeholder="100k or 100,000" pattern="[0-9,.]+\s*[kKmM]?"></div>
         <div class="field"><label for="damage">Damage range <span>(stat window)</span></label><input id="damage" name="entry.526656242" placeholder="500-1000" pattern="\s*[1-9][0-9]*\s*-\s*[1-9][0-9]*\s*"></div>
         <div class="field"><label for="difficulty">Training/party availability</label><select id="difficulty" name="entry.1230573176"><option value="1">1 — Very Easy (Every CC is empty)</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5 — Very Hard (&gt;30 minutes of wait time to find party)</option></select></div>
         <div class="field"><label for="skill">Main attacking skill</label><select id="skill" name="entry.470555109"><option>Power Strike</option><option>Rush + Slash Blast</option><option>Basic Attack</option></select></div>
@@ -113,14 +110,7 @@
     const form = document.querySelector('#submission');
     const button = document.querySelector('#submit');
     const status = document.querySelector('#status');
-    form.addEventListener('submit', () => {
-      ['#xp', '#meso'].forEach(selector => {
-        const input = document.querySelector(selector);
-        input.value = input.value.replace(/,/g, '');
-      });
-      button.disabled = true;
-      button.textContent = 'Submitting…';
-    });
+    form.addEventListener('submit', () => { button.disabled = true; button.textContent = 'Submitting…'; });
     document.querySelector('#submission-frame').addEventListener('load', () => {
       if (!button.disabled) return;
       status.classList.add('show');
