@@ -70,7 +70,7 @@
     const mapValue = document.querySelector('#map');
     const mapHint = document.querySelector('#map-hint');
     const mapResults = document.querySelector('#map-results');
-    const maps = (window.OSMS_MAPS || [])
+    const maps = (window.OSMS_SUBMIT_MAPS || window.OSMS_MAPS || [])
       .filter((map, index, all) => all.findIndex(candidate => candidate.name === map.name && candidate.region === map.region) === index)
       .map(map => `${map.name} — ${map.region}`)
       .sort((a, b) => a.localeCompare(b));
