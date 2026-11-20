@@ -45,8 +45,8 @@
   <main>
     <div class="page-links"><a class="back-link" href="./">← Back to training guide</a><a class="direct-form" href="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/viewform" target="_blank" rel="noopener">Open original form ↗</a></div>
     <h1>Submit map data.</h1>
-    <p class="intro">Share your training results. Use an average rate from a representative session; submissions are reviewed before publishing. Google Forms will open in a new tab so you can see its confirmation or error response.</p>
-    <form class="panel" id="submission" action="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/formResponse" method="post" target="_blank">
+    <p class="intro">Share your training results. Use an average rate from a representative session; submissions are reviewed before publishing. Your answers will open prefilled in the original Google Form for final review and submission.</p>
+    <form class="panel" id="submission">
       <input type="hidden" name="fvv" value="1">
       <input type="hidden" name="pageHistory" value="0">
       <input type="hidden" name="fbzx" value="8797005800775935906">
@@ -66,7 +66,7 @@
         <div class="field wide"><label for="notes">Additional notes <span>(platform, rotation, or anything unusual)</span></label><textarea id="notes" name="entry.1270960116" placeholder="Example: top platform split between two players; rate measured over 30 minutes."></textarea></div>
       </div>
       <button type="submit" id="submit">Submit map data</button>
-      <div class="status" id="status" role="status">Google Forms opened in a new tab. Check that tab for the submission result.</div>
+      <div class="status" id="status" role="status">Google Forms opened in a new tab with your answers prefilled. Review them and click Google’s Submit button.</div>
     </form>
   </main>
   <script src="maps-data.js"></script>
@@ -115,11 +115,17 @@
     const form = document.querySelector('#submission');
     const button = document.querySelector('#submit');
     const status = document.querySelector('#status');
-    form.addEventListener('submit', () => {
+    form.addEventListener('submit', event => {
+      event.preventDefault();
       ['#xp', '#meso'].forEach(selector => {
         const input = document.querySelector(selector);
         input.value = input.value.replace(/,/g, '');
       });
+      const params = new URLSearchParams();
+      new FormData(form).forEach((value, name) => {
+        if (name.startsWith('entry.') && value !== '') params.set(name, value);
+      });
+      window.open(`https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/viewform?${params}`, '_blank', 'noopener');
       status.classList.add('show');
     });
   </script>
