@@ -45,8 +45,8 @@
   <main>
     <div class="page-links"><a class="back-link" href="./">← Back to training guide</a><a class="direct-form" href="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/viewform" target="_blank" rel="noopener">Open original form ↗</a></div>
     <h1>Submit map data.</h1>
-    <p class="intro">Share your training results. Use an average rate from a representative session; submissions are reviewed before publishing.</p>
-    <form class="panel" id="submission" action="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/formResponse" method="post" target="submission-frame">
+    <p class="intro">Share your training results. Use an average rate from a representative session; submissions are reviewed before publishing. Google Forms will open in a new tab so you can see its confirmation or error response.</p>
+    <form class="panel" id="submission" action="https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/formResponse" method="post" target="_blank">
       <input type="hidden" name="fvv" value="1">
       <input type="hidden" name="pageHistory" value="0">
       <input type="hidden" name="fbzx" value="8797005800775935906">
@@ -66,9 +66,8 @@
         <div class="field wide"><label for="notes">Additional notes <span>(platform, rotation, or anything unusual)</span></label><textarea id="notes" name="entry.1270960116" placeholder="Example: top platform split between two players; rate measured over 30 minutes."></textarea></div>
       </div>
       <button type="submit" id="submit">Submit map data</button>
-      <div class="status" id="status" role="status">Thanks — your submission was sent for review.</div>
+      <div class="status" id="status" role="status">Google Forms opened in a new tab. Check that tab for the submission result.</div>
     </form>
-    <iframe name="submission-frame" id="submission-frame" title="Submission status" hidden></iframe>
   </main>
   <script src="maps-data.js"></script>
   <script>
@@ -121,21 +120,7 @@
         const input = document.querySelector(selector);
         input.value = input.value.replace(/,/g, '');
       });
-      button.disabled = true;
-      button.textContent = 'Submitting…';
-      status.classList.remove('show');
-    });
-    document.querySelector('#submission-frame').addEventListener('load', () => {
-      if (!button.disabled) return;
       status.classList.add('show');
-      button.disabled = false;
-      button.textContent = 'Submit another entry';
-      form.reset();
-      mapValue.value = '';
-      mapSearch.setCustomValidity('');
-      mapHint.textContent = 'Start typing a map name, then choose a matching result.';
-      mapResults.hidden = true;
-      mapResults.replaceChildren();
     });
   </script>
 </body>
