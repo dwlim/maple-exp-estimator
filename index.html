@@ -128,6 +128,7 @@
   </main>
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQL93ZrJlx_0Tm9YefoduCVOdooARaixqTkkTFQ2OxGQEmuqIiWiLjVpEo-9MBavTWU7sb13Pm6cTm7/pub?output=csv';
+    const EXCLUDED_MAP_URLS = new Set(['https://dwlim.github.io/maple-exp-estimator']);
     const state = { rows: [], sort: { key: 'xp', direction: 'desc' }, expanded: new Set() };
     const $ = id => document.getElementById(id);
     const fields = ['Map', 'Level', 'XP/Hour', 'Meso/Hour', 'Difficulty to get spot', 'Party Size', 'Damage Range', 'Additional Notes'];
@@ -177,7 +178,7 @@
       document.querySelectorAll('[data-map-row]').forEach(row => { row.addEventListener('click', event => { if (!event.target.closest('button')) toggleGroup(row.dataset.mapRow); }); row.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleGroup(row.dataset.mapRow); } }); });
     }
     function updateStats() { const levels=state.rows.map(r=>r.level).filter(v=>v != null); $('observation-count').textContent=state.rows.length; $('map-count').textContent=new Set(state.rows.map(r=>r.Map)).size; $('level-range').textContent=levels.length ? `${Math.min(...levels)}–${Math.max(...levels)}` : '—'; }
-    async function load() { $('status').textContent='Updating…'; $('table-container').innerHTML='<div class="loading">Loading the latest community reports…</div>'; try { const response=await fetch(`${CSV_URL}&t=${Date.now()}`); if (!response.ok) throw new Error(`HTTP ${response.status}`); state.rows=csvParse(await response.text()).filter(row => row.Map).map(normalized); updateStats(); render(); $('status').textContent='Live source'; $('updated').textContent=`Source updated ${new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`; } catch (error) { $('status').textContent='Could not load source'; $('table-container').innerHTML=`<div class="error">The published sheet could not be loaded right now.<br><small>${esc(error.message)}</small></div>`; } }
+    async function load() { $('status').textContent='Updating…'; $('table-container').innerHTML='<div class="loading">Loading the latest community reports…</div>'; try { const response=await fetch(`${CSV_URL}&t=${Date.now()}`); if (!response.ok) throw new Error(`HTTP ${response.status}`); state.rows=csvParse(await response.text()).filter(row => row.Map && !EXCLUDED_MAP_URLS.has(row.Map.trim().replace(/\/+$/, ''))).map(normalized); updateStats(); render(); $('status').textContent='Live source'; $('updated').textContent=`Source updated ${new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`; } catch (error) { $('status').textContent='Could not load source'; $('table-container').innerHTML=`<div class="error">The published sheet could not be loaded right now.<br><small>${esc(error.message)}</small></div>`; } }
     function syncLevelFilter() { $('tolerance').disabled = $('level').value.trim() === ''; }
     $('search').addEventListener('input', render); $('level').addEventListener('input', () => { syncLevelFilter(); render(); }); $('tolerance').addEventListener('input', render); $('refresh').addEventListener('click', load); syncLevelFilter(); load();
   </script>
