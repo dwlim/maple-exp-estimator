@@ -138,7 +138,7 @@
       const headers = rows.shift() || [];
       return rows.map(values => Object.fromEntries(headers.map((header, i) => [header, values[i] || ''])));
     }
-    const number = value => { const cleaned = String(value || '').replace(/[$,%\s,]/g, ''); const n = Number(cleaned); return Number.isFinite(n) ? n : null; };
+    const number = value => { const cleaned = String(value ?? '').replace(/[$,%\s,]/g, ''); if (!cleaned) return null; const n = Number(cleaned); return Number.isFinite(n) ? n : null; };
     const format = value => value == null ? '—' : new Intl.NumberFormat('en-US').format(value);
     const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
     function normalized(row) { return { ...row, level:number(row.Level), xp:number(row['XP/Hour']), meso:number(row['Meso/Hour']), difficulty:number(row['Difficulty to get spot']), party:number(row['Party Size']), mapName:(row.Map || 'Unnamed map').replace(/\s+—\s+.*/, ''), region:(row.Map || '').match(/—\s*(.*)$/)?.[1] || '' }; }
