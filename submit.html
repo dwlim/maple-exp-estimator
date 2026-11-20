@@ -84,7 +84,7 @@
     }
     function showMapResults() {
       const query = mapSearch.value.trim().toLowerCase();
-      const matches = maps.filter(label => !query || label.toLowerCase().includes(query)).slice(0, 30);
+      const matches = maps.filter(label => !query || label.toLowerCase().includes(query));
       mapResults.replaceChildren(...matches.map(label => {
         const option = document.createElement('button');
         option.type = 'button';
@@ -105,6 +105,8 @@
     document.addEventListener('click', event => {
       if (!event.target.closest('.map-search-wrap')) mapResults.hidden = true;
     });
+    mapHint.textContent = maps.length ? `${maps.length} maps available — type to search, or choose one below.` : 'Map list unavailable — refresh the page and try again.';
+    showMapResults();
     const form = document.querySelector('#submission');
     const button = document.querySelector('#submit');
     const status = document.querySelector('#status');
