@@ -27,6 +27,9 @@
     .hero { margin-bottom:24px; }
     .hero-meta { display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:16px; color:var(--muted); font:11px 'DM Mono',monospace; }
     .hero-meta strong { color:var(--lime); font-weight:500; }
+    .hero-level-filter { display:flex; align-items:center; gap:14px; margin-top:18px; padding:11px 13px; width:max-content; max-width:100%; border:1px solid var(--line); border-radius:10px; background:#191b21c9; }
+    .hero-level-filter > span { color:var(--text); font-size:12px; font-weight:600; }
+    .level-filter input:disabled { color:#656773; border-color:#353740; cursor:not-allowed; opacity:.7; }
     .panel { background:#17191fd9; border:1px solid var(--line); border-radius:18px; box-shadow:0 18px 55px #0003; overflow:hidden; }
     .toolbar { display:flex; align-items:center; gap:12px; padding:18px; border-bottom:1px solid var(--line); }
     .search { position:relative; flex:1; }
@@ -83,7 +86,7 @@
       h1 { letter-spacing:-2px; font-size:clamp(34px,10vw,48px); }
       .toolbar { flex-wrap:wrap; padding:13px; }
       .search { flex:1 0 100%; }
-      .level-filter { flex:1 1 auto; justify-content:center; }
+      .hero-level-filter { width:100%; justify-content:space-between; gap:10px; }
       .level-filter input, .refresh { min-height:42px; }
       .refresh { flex:0 0 auto; }
       .result-line { padding-left:13px; padding-right:13px; }
@@ -105,15 +108,11 @@
       <h1>Find your next <em>training spot.</em></h1>
       <p class="lede">A clean view of player-submitted Spearman training rates, party setups, damage ranges, and practical map notes. Use the filters to narrow the guide, then open the source sheet to add or correct a report.</p>
       <div class="hero-meta" aria-label="Guide summary"><span><strong id="observation-count">—</strong> observations</span><span><strong id="map-count">—</strong> maps</span><span>levels <strong id="level-range">—</strong></span></div>
+      <div class="hero-level-filter"><span>Find spots near your level</span><div class="level-filter" aria-label="Filter by reported level range"><label>Level <input id="level" type="number" min="1" max="200" value="" placeholder="—" aria-label="Center level"></label><span aria-hidden="true">±</span><label><span class="sr-only">Level tolerance</span><input id="tolerance" class="tolerance" type="number" min="0" max="200" value="3" disabled aria-label="Level plus or minus"></label></div></div>
     </section>
     <section class="panel" aria-label="Training observations">
       <div class="toolbar">
         <label class="search"><span class="sr-only">Search observations</span><input id="search" type="search" placeholder="Search maps, notes, or damage…" autocomplete="off"></label>
-        <div class="level-filter" aria-label="Filter by reported level range">
-          <label>Level <input id="level" type="number" min="1" max="200" value="45" aria-label="Center level"></label>
-          <span aria-hidden="true">±</span>
-          <label><span class="sr-only">Level tolerance</span><input id="tolerance" class="tolerance" type="number" min="0" max="200" value="3" aria-label="Level plus or minus"></label>
-        </div>
         <button class="refresh" id="refresh" type="button">Refresh</button>
       </div>
       <div class="result-line"><span id="result-count">Loading observations…</span><span class="status" id="status"></span></div>
@@ -170,7 +169,8 @@
     }
     function updateStats() { const levels=state.rows.map(r=>r.level).filter(v=>v != null); $('observation-count').textContent=state.rows.length; $('map-count').textContent=new Set(state.rows.map(r=>r.Map)).size; $('level-range').textContent=levels.length ? `${Math.min(...levels)}–${Math.max(...levels)}` : '—'; }
     async function load() { $('status').textContent='Updating…'; $('table-container').innerHTML='<div class="loading">Loading the latest community reports…</div>'; try { const response=await fetch(`${CSV_URL}&t=${Date.now()}`); if (!response.ok) throw new Error(`HTTP ${response.status}`); state.rows=csvParse(await response.text()).filter(row => row.Map).map(normalized); updateStats(); render(); $('status').textContent='Live source'; $('updated').textContent=`Source updated ${new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`; } catch (error) { $('status').textContent='Could not load source'; $('table-container').innerHTML=`<div class="error">The published sheet could not be loaded right now.<br><small>${esc(error.message)}</small></div>`; } }
-    ['search','level','tolerance'].forEach(id => $(id).addEventListener('input', render)); $('refresh').addEventListener('click', load); load();
+    function syncLevelFilter() { $('tolerance').disabled = $('level').value.trim() === ''; }
+    $('search').addEventListener('input', render); $('level').addEventListener('input', () => { syncLevelFilter(); render(); }); $('tolerance').addEventListener('input', render); $('refresh').addEventListener('click', load); syncLevelFilter(); load();
   </script>
 </body>
 </html>
