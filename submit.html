@@ -113,13 +113,17 @@
     const form = document.querySelector('#submission');
     const button = document.querySelector('#submit');
     const status = document.querySelector('#status');
-    form.addEventListener('submit', () => {
+    form.addEventListener('submit', event => {
+      event.preventDefault();
       ['#xp', '#meso'].forEach(selector => {
         const input = document.querySelector(selector);
         input.value = input.value.replace(/,/g, '');
       });
-      button.disabled = true;
-      button.textContent = 'Submitting…';
+      const params = new URLSearchParams({ usp: 'pp_url' });
+      new FormData(form).forEach((value, key) => {
+        if (key.startsWith('entry.')) params.append(key, value);
+      });
+      window.location.href = `https://docs.google.com/forms/d/e/1FAIpQLSe0n5BE22M-x16GJNfvPdDL6F7cGbyL7ImjnpTLs7LntuPtaA/viewform?${params}`;
     });
     document.querySelector('#submission-frame').addEventListener('load', () => {
       if (!button.disabled) return;
